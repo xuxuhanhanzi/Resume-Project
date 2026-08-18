@@ -1,0 +1,29 @@
+{
+  "manifest_version": "1.0",
+  "dataset": "ChartQAPro",
+  "created_at": "2026-08-07",
+  "source": {
+    "local_path": "D:\\Users\\27475\\Desktop\\ChartQAPro\\chartqapro_test.parquet",
+    "official_repository": "https://github.com/vis-nlp/ChartQAPro",
+    "paper": "https://aclanthology.org/2025.findings-acl.978/"
+  },
+  "target": {
+    "relative_file": "datasets/ChartQAPro/chartqapro_test.parquet"
+  },
+  "copy_policy": "canonical parquet copied; Arrow cache and lock files excluded; source retained",
+  "file": {
+    "bytes": 209486545,
+    "sha256": "6209a9a6f7307b761e70ff9e708cb7505e0327d7eb932aa26152b8240f633da5"
+  },
+  "schema": {
+    "rows": 1948,
+    "columns": ["Question", "Answer", "Question Type", "image", "Year", "Paragraph"],
+    "image_storage": "encoded bytes"
+  },
+  "verification": {
+    "null_count_all_columns": 0,
+    "decoded_first_20_images": 20,
+    "passed": true
+  }
+}
+

@@ -1,0 +1,18 @@
+[runtime]
+max_iterations = 12
+max_tool_calls = 32
+token_budget = 32000
+time_budget_seconds = 600
+model_retries = 2
+tool_retries = 1
+parallel_read_tools = true
+
+[context]
+max_history_messages = 12
+max_message_chars = 8000
+
+[features]
+bm25 = true
+skills = true
+mcp_subset = true
+reviewer_agent_as_tool = true

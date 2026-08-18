@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "workload": "real AgentRuntime + MultiAgentHarness + subprocess verifier; deterministic ScriptedProvider, not model inference",
+  "python": "3.12.3 | packaged by conda-forge | (main, Apr 15 2024, 18:20:11) [MSC v.1938 64 bit (AMD64)]",
+  "results": [
+    {
+      "concurrency": 1,
+      "tasks": 120,
+      "completed": 120,
+      "failed": 0,
+      "cancelled": 0,
+      "wall_seconds": 11.902331299999787,
+      "process_cpu_seconds": 0.15625,
+      "throughput_tasks_per_second": 10.082058461942001,
+      "latency_p50_seconds": 5.97150719165802,
+      "latency_p95_seconds": 11.349132537841797,
+      "latency_p99_seconds": 11.808478355407715,
+      "working_set_bytes": 32284672,
+      "peak_working_set_bytes": 32284672,
+      "private_bytes": 22814720
+    },
+    {
+      "concurrency": 4,
+      "tasks": 120,
+      "completed": 120,
+      "failed": 0,
+      "cancelled": 0,
+      "wall_seconds": 3.6079142000016873,
+      "process_cpu_seconds": 0.140625,
+      "throughput_tasks_per_second": 33.26021444743444,
+      "latency_p50_seconds": 1.8592939376831055,
+      "latency_p95_seconds": 3.449465751647949,
+      "latency_p99_seconds": 3.5777390003204346,
+      "working_set_bytes": 32841728,
+      "peak_working_set_bytes": 32997376,
+      "private_bytes": 23130112
+    },
+    {
+      "concurrency": 8,
+      "tasks": 120,
+      "completed": 120,
+      "failed": 0,
+      "cancelled": 0,
+      "wall_seconds": 3.507805399996869,
+      "process_cpu_seconds": 0.078125,
+      "throughput_tasks_per_second": 34.20942336199925,
+      "latency_p50_seconds": 1.816025733947754,
+      "latency_p95_seconds": 3.4159092903137207,
+      "latency_p99_seconds": 3.4679932594299316,
+      "working_set_bytes": 33624064,
+      "peak_working_set_bytes": 33796096,
+      "private_bytes": 23789568
+    }
+  ]
+}

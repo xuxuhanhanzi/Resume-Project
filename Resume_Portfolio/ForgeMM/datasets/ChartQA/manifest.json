@@ -1,0 +1,37 @@
+{
+  "manifest_version": "1.0",
+  "dataset": "ChartQA",
+  "created_at": "2026-08-07",
+  "source": {
+    "local_path": "D:\\Users\\27475\\Desktop\\datasets\\ChartQA\\ChartQA Dataset",
+    "official_repository": "https://github.com/vis-nlp/ChartQA"
+  },
+  "target": {
+    "relative_root": "datasets/ChartQA",
+    "layout": "flattened split root"
+  },
+  "copy_policy": "copied; source retained",
+  "totals": {
+    "files": 62652,
+    "bytes": 1036819201
+  },
+  "splits": {
+    "train": {"files": 54953, "bytes": 909944962},
+    "val": {"files": 3170, "bytes": 53066454},
+    "test": {"files": 4529, "bytes": 73807785}
+  },
+  "key_file_sha256": {
+    "train/train_human.json": "4eaaa03e406dbbbe43caff925dbec9930b87fadba960f1c2ab30a5def287c384",
+    "train/train_augmented.json": "77342d8527d2a194a6011ce3f4389ea32d9c50cfe60b10c74dbe1cd2e49724da",
+    "val/val_human.json": "e297ce5b38b4ab79bd0e22a93eb19a65cb89f9bd07ce886cb78f2e333fb0ba14",
+    "val/val_augmented.json": "cafc675781fba27282b78cab40eb49b77a5bf890ef1e89294bb67c994bdfde47",
+    "test/test_human.json": "5fba61b508a96b85cd5906bb14adfc1ba552bdcf88ac568ed6e2f79dcf0460b7",
+    "test/test_augmented.json": "9df43a15e93ecb8496c3e5dc23f6a733cfeccac838ab41126ab56576b9305de1"
+  },
+  "verification": {
+    "source_target_file_counts_match": true,
+    "source_target_byte_counts_match": true,
+    "full_per_file_hash_pending": true
+  }
+}
+

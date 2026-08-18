@@ -1,0 +1,5 @@
+[run]
+name = "cpu-smoke"
+stage = "stage01"
+seed = 1337
+log_level = "INFO"

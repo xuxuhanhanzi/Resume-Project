@@ -1,0 +1,102 @@
+{
+  "checks": {
+    "b0": {
+      "config_hash": "5dbbc00080478e0c",
+      "config_hashes_ok": true,
+      "manifest_order_ok": true,
+      "scenes": 12,
+      "statuses_ok": true,
+      "summary_recomputed_ok": true
+    },
+    "b1": {
+      "config_hash": "7063e329922ace79",
+      "config_hashes_ok": true,
+      "manifest_order_ok": true,
+      "scenes": 12,
+      "statuses_ok": true,
+      "summary_recomputed_ok": true
+    },
+    "e1": {
+      "config_hash": "8025a55d6ca24a35",
+      "config_hashes_ok": true,
+      "manifest_order_ok": true,
+      "scenes": 12,
+      "statuses_ok": true,
+      "summary_recomputed_ok": true
+    },
+    "e2": {
+      "config_hash": "b3f4b2b32e8114aa",
+      "config_hashes_ok": true,
+      "manifest_order_ok": true,
+      "scenes": 12,
+      "statuses_ok": true,
+      "summary_recomputed_ok": true
+    },
+    "e2_vs_b0.json": {
+      "recomputed_ok": true
+    },
+    "e3": {
+      "config_hash": "2e657107e20d41b0",
+      "config_hashes_ok": true,
+      "manifest_order_ok": true,
+      "scenes": 12,
+      "statuses_ok": true,
+      "summary_recomputed_ok": true
+    },
+    "e3_vs_b0.json": {
+      "recomputed_ok": true
+    },
+    "e4": {
+      "config_hash": "c9ca136a2b08dae2",
+      "config_hashes_ok": true,
+      "manifest_order_ok": true,
+      "scenes": 12,
+      "statuses_ok": true,
+      "summary_recomputed_ok": true
+    },
+    "e4_vs_e2.json": {
+      "recomputed_ok": true
+    },
+    "manifest": {
+      "scenes": 12,
+      "unique": true
+    }
+  },
+  "errors": [],
+  "files": {
+    "artifacts/runs/formal_v5/b0/predictions.jsonl": "3d4a6c7de14c77492ede6e88b323f60a7ada0104a19ac1f0e6ae0bbb3c009ffd",
+    "artifacts/runs/formal_v5/b0/summary.json": "04454fcb12de90b8f4fd0e40cf6afa24c6c0359e21306ecf177762cc5ffcf635",
+    "artifacts/runs/formal_v5/b1/predictions.jsonl": "058f1a7778e555b7b2568034ed4241ebdc88a85d6701756fb88ac18fa40d010b",
+    "artifacts/runs/formal_v5/b1/summary.json": "34fbf9230557b3aec628682e5b83f64e2ca52dea962125dbbcf983fa0a9acf28",
+    "artifacts/runs/formal_v5/e1/predictions.jsonl": "7f6d74f6a89034f1be3552a9a22cd12739e48889f30f2d20afa472d343de8c8b",
+    "artifacts/runs/formal_v5/e1/summary.json": "c0d4894a47f3f4c0d3ca229addacdb097d27526206f21dd21b8847420974ab84",
+    "artifacts/runs/formal_v5/e2/predictions.jsonl": "575ce0c0e6bd8fd1b3c358ae054f566c3fc858634f309144742b7ec74329ab64",
+    "artifacts/runs/formal_v5/e2/summary.json": "381ed466be153ca35c5060e1c4c21871f502c84ab921ad3f52ea6476db0b8264",
+    "artifacts/runs/formal_v5/e2_vs_b0.json": "bd5c3cd2e1bec879e4abcb6991ab8989f0ff3415a0e1214a26c5d470c76ebc17",
+    "artifacts/runs/formal_v5/e3/predictions.jsonl": "ee2a8d2d7385a88264ad810610bbbadad041dc69737641ea8ae8802cc386172b",
+    "artifacts/runs/formal_v5/e3/summary.json": "0c947e0dc68049a913814bfff3475f3ee1351ac224eb2dd96b3eb885994ef47b",
+    "artifacts/runs/formal_v5/e3_vs_b0.json": "7c8f139eb62f06dcf30cc6c2f0ce836e3c1b9840eee4e1d35c41b81baf9ad4b7",
+    "artifacts/runs/formal_v5/e4/predictions.jsonl": "acdaa227ffecc91c2380f66181798fa4c3103052867b9b418bfb70787340dfb1",
+    "artifacts/runs/formal_v5/e4/summary.json": "fc40c41740aced71a408f23395c26bd6c691f6844e2d605f84d4e7446d16e798",
+    "artifacts/runs/formal_v5/e4_vs_e2.json": "b527357e2631f9aa91e85cc05613afc11801069e52f6d652f95a8f3b4c1a6ff4",
+    "artifacts/stage00/official_preflight_local.json": "7e6ec15a674267353816c50bda1084b9ebda17a4f0505a6d671b3b140c8570cc",
+    "artifacts/stage00/upstream_lock.json": "b96346fcb026812630cddd8a5aa6413aa5f607bbd6e922348f3a63fc58de40ef",
+    "configs/b0_fast_greedy.yaml": "452f64d8a0daa2744605fc8568b46f2481844829e68ba115e8d46dd278a1bcec",
+    "configs/b1_slow_greedy.yaml": "da1eb7a9dcc0f1c700e1f1946352670b1639316914fac90cebbd206c6e3a62c4",
+    "configs/e1_candidates_only.yaml": "c2440249cca8a8486ae7fc0930adae484b2091ccdc679e6610e67bcfbe2fabbc",
+    "configs/e2_rerank.yaml": "a78d180c1826d46a9dec22c6e66a1dafa81265d72cda84716b2bc599533b69cb",
+    "configs/e3_router.yaml": "cfcdb59401d31d6db355ad91745dfe1b85c99b273760db54c1efcdbf521c477b",
+    "configs/e4_guard.yaml": "01bcd1524821974cea78fd7cd8f68bb17a83ff59862f99c90dac40ad42997797",
+    "data/synthetic/smoke_manifest.jsonl": "c502d6378c46f5adcf42c8485017b222a19e0fd08dfe3510b59ab81f3b9a3c1a",
+    "docs/experiments/2026-08-14_synthetic_formal_v5.md": "f4464bb2effd20d1c8734a987acb731b907ead07764d33685d70c46fcd7c9555",
+    "docs/result_report.md": "9d080ebcd18a856074a930b5a31268215b28c0947bc5cc36ba4ebf3cd7ddbfd6",
+    "src/drivevla_guard/backends.py": "eac0cac01cc33d45dd3df48692f8cc417caec2a4d0f5ea800cc521b05eb248f4",
+    "src/drivevla_guard/pipeline.py": "e1e76ef9b8317af9efc97fae59d0bccd8b97385e053540f4b10183fbdaac425b",
+    "src/drivevla_guard/risk.py": "ff9487eb81c6ec847b8f8ea004bf4059149dad46fa3d423c6a2fac5e9094d83b",
+    "src/drivevla_guard/types.py": "a0e9f4dcb5f0325507cb202160be00cb2c679313cc5b5c929ba8f03b5267a5b3"
+  },
+  "formal_run": "synthetic_formal_v5",
+  "generated_at_utc": "2026-08-14T11:47:04.256287+00:00",
+  "ready": true,
+  "schema_version": 1
+}

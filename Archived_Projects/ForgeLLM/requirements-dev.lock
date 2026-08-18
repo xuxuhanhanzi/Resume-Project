@@ -1,0 +1,5 @@
+# Direct development dependencies verified on Windows/Python 3.12.3 on 2026-07-11.
+# Install the project itself in editable mode before or together with this file.
+mypy==1.20.2
+pytest==8.4.2
+ruff==0.15.21

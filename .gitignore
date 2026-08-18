@@ -1,0 +1,50 @@
+# Workspace-local metadata
+.idea/
+.vs/
+.vscode/
+.codex/
+.agents/
+.workbuddy/
+tmp/
+**/.audit_tmp/
+
+# Python and test caches
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache*/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+
+# JavaScript and build caches
+**/node_modules/
+**/dist/
+**/build/
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Local secrets (examples remain allowed by project-level rules)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Large generated/downloaded assets that cannot be stored in regular GitHub Git
+Resume_Portfolio/cloud_packages/*.zip
+Resume_Portfolio/cloud_packages/*.tar.gz
+**/*.safetensors
+**/*.ckpt
+**/checkpoints/
+**/wandb/
+**/mlruns/
+
+# Reproducible third-party benchmark checkouts and corpora
+Resume_Portfolio/RepoPilot/external/
+Resume_Portfolio/RepoPilot/evaluation/benchmarks/workspaces/
+Resume_Portfolio/RepoPilot/evaluation/benchmarks/corpora/
+Resume_Portfolio/RepoPilot/evaluation/benchmarks/data/
+
+# Temporary names used only while flattening nested repositories into this repo
+**/.git-codex-backup/

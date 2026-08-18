@@ -1,0 +1,39 @@
+[model]
+vocab_size = 320
+d_model = 64
+n_layers = 2
+n_heads = 4
+n_kv_heads = 2
+ffn_hidden_dim = 192
+max_seq_len = 64
+rms_norm_eps = 0.00001
+rope_theta = 10000.0
+dropout = 0.0
+tie_embeddings = true
+qk_norm = true
+attention_backend = "sdpa"
+
+[training]
+run_name = "stage3-smoke"
+seed = 20260727
+device = "auto"
+precision = "fp32"
+optimizer = "adamw"
+sequence_length = 64
+micro_batch_size = 2
+gradient_accumulation_steps = 1
+max_steps = 20
+learning_rate = 0.001
+muon_learning_rate = 0.02
+min_lr_ratio = 0.1
+warmup_steps = 2
+weight_decay = 0.1
+beta1 = 0.9
+beta2 = 0.95
+gradient_clip_norm = 1.0
+validation_interval = 10
+validation_batches = 2
+checkpoint_interval = 10
+log_interval = 1
+mtp_future_tokens = 0
+mtp_loss_weight = 0.0

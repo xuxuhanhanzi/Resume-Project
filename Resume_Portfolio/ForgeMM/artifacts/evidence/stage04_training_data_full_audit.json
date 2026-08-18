@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "experiment_scope": "local_full_training_dataset_and_reward_replay",
+  "sft_rows": 3526,
+  "grpo_rows": 1763,
+  "unique_sft_sample_ids": 3526,
+  "unique_grpo_groups": 1763,
+  "groups_with_exactly_templates_0_and_1": 1763,
+  "missing_image_references": 0,
+  "gold_reward_replays": 3526,
+  "gold_reward_failures": 0,
+  "all_checks_passed": true,
+  "sft_sha256": "fa3ac2ebbd179d5efd8d436a726ad9197e37351e5b17b979fb5474eddfd5548f",
+  "grpo_sha256": "eab7b4e929a77da29ad98d7d110b88ec2c32df69ee73de892b2eaa966d9d8b6a",
+  "raw_audit_sha256": "34adbe78d0e36db6a6f621a681ad8bb1ad51ca813640a1c8b45286d72f040ab8",
+  "claim_boundary": "local data transport, parsing and deterministic reward replay only"
+}

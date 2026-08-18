@@ -1,0 +1,53 @@
+{
+  "benchmark_id": "google_frames_oracle_document",
+  "budget": {
+    "max_iterations": 3,
+    "max_tool_calls": 8,
+    "max_total_tokens": 4000,
+    "max_wall_seconds": 120.0
+  },
+  "dataset_revision": "58d9fb6330f3ab1316d1eca12e5e8ef23dcc22ef",
+  "dependency_lock_sha256": "8acbf9d3566c9ae3e3c8956cee2943d3c5fab5d99e6509433405d23d6c220463",
+  "environment_revision": "frames-protocol-fixture-v1",
+  "evaluator_revision": "frames-deterministic-v1",
+  "model_id": "oracle-protocol-fixture",
+  "model_parameters": {
+    "temperature": 0.0
+  },
+  "model_revision": "not-a-model-baseline",
+  "network_policy": "deny",
+  "prompt_revision": "frames-task-v1",
+  "random_seed": 7,
+  "schema_version": 1,
+  "split": "test",
+  "tasks": [
+    {
+      "assets": [
+        {
+          "sha256": "4255093c93b595b5b04c7c8dde290b48ec87d72ca0fb0b760d9dd02740d669ff",
+          "uri": "hf://datasets/google/frames-benchmark/test.tsv"
+        }
+      ],
+      "task_id": "frames-test-0000"
+    },
+    {
+      "assets": [
+        {
+          "sha256": "4255093c93b595b5b04c7c8dde290b48ec87d72ca0fb0b760d9dd02740d669ff",
+          "uri": "hf://datasets/google/frames-benchmark/test.tsv"
+        }
+      ],
+      "task_id": "frames-test-0001"
+    },
+    {
+      "assets": [
+        {
+          "sha256": "4255093c93b595b5b04c7c8dde290b48ec87d72ca0fb0b760d9dd02740d669ff",
+          "uri": "hf://datasets/google/frames-benchmark/test.tsv"
+        }
+      ],
+      "task_id": "frames-test-0002"
+    }
+  ],
+  "tool_config_revision": "frames-read-tools-v1"
+}

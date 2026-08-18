@@ -1,0 +1,20 @@
+name: repopilot_python_micro_v1
+version: 1
+purpose: Stage 6 deterministic development and localization benchmark
+tasks:
+  - {task_id: micro_subtract, path: cases/subtract/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_divide, path: cases/divide/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_even, path: cases/even/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_clamp, path: cases/clamp/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_slugify, path: cases/slugify/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_normalize, path: cases/normalize/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_safe_get, path: cases/safe_get/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_average, path: cases/average/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_starts_with, path: cases/starts_with/task.yaml, relevant_files: [module.py]}
+  - {task_id: micro_absolute, path: cases/absolute/task.yaml, relevant_files: [module.py]}
+
+rules:
+  model_sees_hidden_tests: false
+  success: immutable_verifier_passes
+  fixed_scaffold_required: true
+  fixed_budget_required: true

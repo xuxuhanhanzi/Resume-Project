@@ -1,0 +1,12 @@
+datasets_root: ../datasets
+
+chartqa:
+  root: ChartQA
+  splits:
+    train: train
+    validation: val
+    test: test
+
+chartqapro:
+  file: ChartQAPro/chartqapro_test.parquet
+

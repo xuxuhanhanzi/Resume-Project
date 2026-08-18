@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "experiment_scope": "real_local_qwen_service_capacity",
+  "platform": "Windows 11 / RTX 4070 Laptop 8GB",
+  "ollama_version": "0.32.9",
+  "model": "qwen2.5:7b",
+  "parameter_size": "7.6B",
+  "quantization": "Q4_K_M",
+  "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "temperature": 0.0,
+  "max_output_tokens": 16,
+  "tasks_per_level": 24,
+  "results": [
+    {"concurrency": 1, "completed": 24, "failed": 0, "throughput_requests_per_second": 5.5202, "latency_p50_seconds": 2.1736, "latency_p95_seconds": 4.1564, "output_tokens_per_second": 11.0404},
+    {"concurrency": 4, "completed": 24, "failed": 0, "throughput_requests_per_second": 16.7974, "latency_p50_seconds": 0.8302, "latency_p95_seconds": 1.3833, "output_tokens_per_second": 33.5949},
+    {"concurrency": 8, "completed": 24, "failed": 0, "throughput_requests_per_second": 18.6205, "latency_p50_seconds": 0.7763, "latency_p95_seconds": 1.2435, "output_tokens_per_second": 37.2411}
+  ],
+  "all_checks_passed": true,
+  "raw_summary_sha256": "5c10b5c9ace34364938ce8e3fb0760c5e4ceda62aefce61de0932d6e1558097c",
+  "claim_boundary": "fixed short loopback model requests through RepoPilot provider; not end-to-end agent task throughput"
+}

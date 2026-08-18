@@ -1,0 +1,15 @@
+{
+  "collision_failures": 6,
+  "drivable_failures": 0,
+  "failed_scenes": 0,
+  "mean_comfort": 1.0,
+  "mean_latency_ms": 4.0,
+  "mean_progress": 1.0,
+  "mean_risk": 6.877624999999999,
+  "metric_scope": "synthetic_proxy_not_navsim",
+  "p95_latency_ms": 4.0,
+  "proxy_score": 0.75,
+  "scenes": 12,
+  "slow_route_rate": 0.0,
+  "valid_scenes": 12
+}

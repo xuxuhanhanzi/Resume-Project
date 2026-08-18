@@ -1,0 +1,14 @@
+rerank_enabled: true
+generation:
+  primary_mode: fast
+  fast_candidates: 4
+  slow_candidates: 1
+  temperature: 0.7
+  top_p: 0.95
+  top_k: 50
+  max_new_tokens: 768
+  expected_action_tokens: 10
+  seed: 17
+router:
+  enabled: false
+

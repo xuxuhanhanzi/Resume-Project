@@ -1,0 +1,33 @@
+[model]
+model_id = "Qwen/Qwen3-0.6B-Base"
+revision = "da87bfb608c14b7cf20ba1ce41287e8de496c0cd"
+quantization = "none"
+
+[data]
+train_path = "data/processed/stage4_smol_constraints_v1/train.jsonl"
+validation_path = "data/processed/stage4_smol_constraints_v1/validation.jsonl"
+task_test_path = "data/processed/stage4_correctness_v1/test.jsonl"
+retention_path = "data/processed/stage3_tinystories/validation.jsonl"
+
+[lora]
+rank = 16
+alpha = 32
+dropout = 0.05
+target_modules = "all-linear"
+
+[training]
+run_name = "stage4-qwen3-0.6b-lora-smoke"
+seed = 20260728
+max_length = 512
+micro_batch_size = 1
+gradient_accumulation_steps = 4
+max_steps = 2
+max_assistant_tokens = 4000
+max_duration_seconds = 600.0
+learning_rate = 0.0002
+warmup_ratio = 0.03
+weight_decay = 0.0
+gradient_clip_norm = 1.0
+eval_examples = 4
+generation_examples = 2
+max_new_tokens = 32

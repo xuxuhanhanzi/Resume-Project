@@ -1,0 +1,84 @@
+schema_version: 1
+status: p8a_complete_p10_training_blocked_torch_install
+
+runtime_gates:
+  local_model_endpoint:
+    required: true
+    current: available_qwen2_5_3b_qwen2_5_7b_and_qwen3_4b
+    check: "OpenAI-compatible endpoint responds and an immutable model revision is configured"
+  docker_daemon:
+    required: true
+    current: available_server_29_6_1_network_none_verified
+    check: "docker version returns both client and server"
+  frames_offline_corpus:
+    required_for: [retrieval]
+    current: smoke10_materialized_39_pages_agent_smoke10_passed_2_of_10
+  dabench_tables:
+    required_for: [agent_smoke, formal]
+    current: three_tables_materialized_agent_smoke10_passed_9_of_10
+  swebench_live_images:
+    required_for: [agent_smoke, formal]
+    current: all_three_materialized_agent_smoke_officially_scored_0_of_3
+    evaluator_revision: ad79b850f15e33992e96f03f6e97f05ddf9aa0be
+    portability_patch: windows_force_lf_only
+
+fixed_controls:
+  temperature: 0.0
+  random_seed: 7
+  repetitions_per_task: 3
+  network_policy: deny
+  task_order: fixed
+  report_domain_scores_separately: true
+  aggregate_cross_domain_score: false
+
+p5_baselines:
+  variants:
+    - id: b0_direct_model
+      tools: false
+      memory: false
+      environment_feedback: false
+    - id: b1_fixed_agent
+      tools: true
+      memory: true
+      environment_feedback: true
+  suites:
+    frames:
+      modes: [oracle_document, retrieval]
+      primary_metric: normalized_exact_match
+      task_ids: frames-test-0000_to_0009_frozen
+      formal_status: b0_and_b1_completed_three_repeats
+    dabench:
+      split_by: [easy, medium, hard]
+      primary_metric: question_accuracy
+      task_ids: [dabench-dev-0000, dabench-dev-0005, dabench-dev-0006, dabench-dev-0007, dabench-dev-0008, dabench-dev-0009, dabench-dev-0010, dabench-dev-0011, dabench-dev-0014, dabench-dev-0023]
+      formal_status: b1_completed_three_repeats_accuracy_0_9
+    swebench_live:
+      evaluator: official_only
+      primary_metric: resolved
+      task_ids: [aws-cloudformation__cfn-lint-3767, python-babel__babel-1141, projectmesa__mesa-2394]
+      quick_status: completed_0_of_3_one_empty_patch_two_unresolved
+
+p6_single_variable_ablations:
+  - id: a1_no_feedback_recovery
+    change_from_b1: environment_feedback=false
+    formal_status: dabench_three_repeats_all_8_of_10_vs_b1_all_9_of_10
+  - id: a2_no_retrieval
+    change_from_b1: retrieval=false
+  - id: a3_no_memory
+    change_from_b1: memory=false
+  - id: a4_no_planner
+    change_from_b1: planner=false
+    formal_status: frames_three_repeats_1_1_0_vs_b1_2_2_1
+  - id: a5_no_reviewer
+    change_from_b1: reviewer=false
+    formal_status: frames_three_repeats_2_1_1_vs_b1_2_2_1_lower_cost
+  - id: a6_fixed_model_no_routing
+    change_from_b1: adaptive_model_routing=false
+
+claim_gates:
+  - "Protocol smoke results are not model performance results"
+  - "Formal comparisons use identical task IDs, model revision, budget, and evaluator revision"
+  - "Every claim links to a manifest, trace, result table, and failure audit"
+  - "No cross-domain headline score is reported"
+
+formal_repeat_results: artifacts/benchmarks/20260807_p5_p6_formal_repeats/results.json

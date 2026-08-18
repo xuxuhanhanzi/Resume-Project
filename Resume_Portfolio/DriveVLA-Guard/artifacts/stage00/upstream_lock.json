@@ -1,0 +1,17 @@
+{
+  "codebook_sha256": "e6bf8eff32497eaefca66f488dda1edefe97ed2696d1d23c01839dc27422408e",
+  "commit": "ba34eed74ce6729e7986592d0e66cbaca397b4fa",
+  "license_class": "academic_noncommercial_nontransferable",
+  "ready": true,
+  "redistribution_allowed": false,
+  "required_files": {
+    "LICENSE": true,
+    "README.md": true,
+    "codebook_cache/agent_vocab.pkl": true,
+    "models/action_tokenizer.py": true,
+    "models/autovla.py": true,
+    "navsim/navsim/agents/autovla_agent.py": true
+  },
+  "root": "D:\\Users\\27475\\Desktop\\Resume_Project\\Resume_Portfolio\\DriveVLA-Guard\\third_party\\AutoVLA",
+  "upstream": "https://github.com/ucla-mobility/AutoVLA"
+}

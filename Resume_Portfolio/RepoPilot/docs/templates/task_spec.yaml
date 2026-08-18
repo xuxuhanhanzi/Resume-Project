@@ -1,0 +1,17 @@
+# Public immutable task contract. Evaluator-only fields belong in a separate file.
+task_id: null
+workspace: null
+problem_statement: null
+language: python
+allowed_paths: []
+forbidden_paths: []
+visible_tests: []
+setup_command: []
+test_command: []
+network_policy: deny
+time_budget_seconds: null
+token_budget: null
+max_iterations: null
+max_tool_calls: null
+max_changed_files: null
+trusted_fixture: false

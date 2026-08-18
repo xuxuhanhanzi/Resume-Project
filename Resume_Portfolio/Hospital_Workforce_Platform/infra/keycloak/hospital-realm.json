@@ -1,0 +1,28 @@
+{
+  "realm": "hospital",
+  "enabled": true,
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      {"name": "SYSTEM_ADMIN"}, {"name": "HR_ADMIN"}, {"name": "DEPARTMENT_MANAGER"},
+      {"name": "FINANCE"}, {"name": "EMPLOYEE"}, {"name": "AUDITOR"}
+    ]
+  },
+  "clients": [{
+    "clientId": "hospital-api",
+    "name": "Hospital API development client",
+    "enabled": true,
+    "publicClient": true,
+    "directAccessGrantsEnabled": true,
+    "standardFlowEnabled": true,
+    "redirectUris": ["http://localhost:5173/*"],
+    "webOrigins": ["http://localhost:5173"]
+  }],
+  "users": [
+    {"username": "hr.admin", "enabled": true, "firstName": "HR", "lastName": "Admin", "email": "hr.admin@example.test", "emailVerified": true, "requiredActions": [], "credentials": [{"type": "password", "value": "Password1!", "temporary": false}], "realmRoles": ["HR_ADMIN"]},
+    {"username": "finance", "enabled": true, "firstName": "Finance", "lastName": "User", "email": "finance@example.test", "emailVerified": true, "requiredActions": [], "credentials": [{"type": "password", "value": "Password1!", "temporary": false}], "realmRoles": ["FINANCE"]},
+    {"username": "manager", "enabled": true, "firstName": "Department", "lastName": "Manager", "email": "manager@example.test", "emailVerified": true, "requiredActions": [], "credentials": [{"type": "password", "value": "Password1!", "temporary": false}], "realmRoles": ["DEPARTMENT_MANAGER"]},
+    {"username": "employee", "enabled": true, "firstName": "Employee", "lastName": "Demo", "email": "employee@example.test", "emailVerified": true, "requiredActions": [], "credentials": [{"type": "password", "value": "Password1!", "temporary": false}], "realmRoles": ["EMPLOYEE"]},
+    {"username": "auditor", "enabled": true, "firstName": "Audit", "lastName": "User", "email": "auditor@example.test", "emailVerified": true, "requiredActions": [], "credentials": [{"type": "password", "value": "Password1!", "temporary": false}], "realmRoles": ["AUDITOR"]}
+  ]
+}

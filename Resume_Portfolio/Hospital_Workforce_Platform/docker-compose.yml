@@ -1,0 +1,99 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-hospital}
+      MYSQL_USER: ${MYSQL_USER:-hospital}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hospital}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    ports: ["3306:3306"]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p\"$${MYSQL_ROOT_PASSWORD}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.4
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME: http://localhost:8081
+      KC_HEALTH_ENABLED: "true"
+    ports: ["8081:8080"]
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+
+  backend:
+    build:
+      context: .
+      network: host
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-hospital}?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-hospital}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-hospital}
+      SPRING_DATA_REDIS_HOST: redis
+      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/hospital
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/hospital/protocol/openid-connect/certs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    ports: ["8080:8080"]
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+    depends_on: [backend]
+
+  grafana:
+    image: grafana/grafana:11.5.2
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./infra/grafana/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+
+  frontend:
+    build:
+      context: ./frontend
+      network: host
+    ports: ["5173:80"]
+    depends_on: [backend]
+
+  load-test:
+    image: grafana/k6:2.1.0
+    profiles: ["perf"]
+    environment:
+      ACCESS_TOKEN: ${ACCESS_TOKEN:-}
+      BASE_URL: http://backend:8080
+      DEPARTMENT_ID: ${DEPARTMENT_ID:-1}
+      K6_SMOKE: ${K6_SMOKE:-false}
+    volumes:
+      - ./load-tests:/scripts:ro
+      - ./docs/experiments/artifacts/h4-k6:/results
+    command: run --summary-export=/results/summary.json /scripts/scheduling.js
+    depends_on: [backend]
+
+volumes:
+  mysql_data:
