@@ -1,0 +1,7 @@
+{"id":"method-en-01","subset":"english","text":"token methods compare segmentation boundaries on unseen English text"}
+{"id":"method-zh-01","subset":"chinese","text":"现代分词方法需要比较边界、概率切分与词表更新。"}
+{"id":"method-code-01","subset":"code","text":"for (int i = 0; i < 10; ++i) { tokens.push_back(i); }"}
+{"id":"method-number-01","subset":"numbers","text":"Order 2026-07-27 costs $12.50 and uses version 3.12.3."}
+{"id":"method-space-01","subset":"whitespace","text":"  tabs\tspaces  and\nnewlines remain exact  "}
+{"id":"method-emoji-01","subset":"emoji","text":"🙂🚀🧠✨ family 👨‍👩‍👧‍👦 stays reversible"}
+{"id":"method-mixed-01","subset":"mixed","text":"ForgeLLM 比较 BPE, Unigram 与 dynamic patches 123."}

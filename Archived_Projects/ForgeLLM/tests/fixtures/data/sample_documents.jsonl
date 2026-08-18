@@ -1,0 +1,9 @@
+{"id":"doc-en","text":"ForgeLLM keeps every experiment traceable and reproducible."}
+{"id":"doc-zh","text":"可复现的数据处理流程需要配置、哈希、统计报告和明确的失败记录。"}
+{"id":"doc-en-copy","text":"ForgeLLM keeps every experiment traceable and reproducible."}
+{"id":"doc-short","text":"tiny"}
+{"id":"doc-empty","text":"   \n  "}
+{"id":"doc-control","text":"This record contains a forbidden control character: \u0000."}
+{"id":"doc-unicode","text":"Cafe\u0301 text is normalized into a stable Unicode representation."}
+{"id":"doc-lines","text":"The first line has trailing spaces.   \r\nThe second line remains separate.   "}
+{"id":"doc-invalid"}

@@ -1,0 +1,53 @@
+{
+  "benchmark_id": "swebench_live_lite_python",
+  "budget": {
+    "max_iterations": 12,
+    "max_tool_calls": 32,
+    "max_total_tokens": 32000,
+    "max_wall_seconds": 1800.0
+  },
+  "dataset_revision": "a637bd46829f3132e12938c8a0ca93173a977b8e",
+  "dependency_lock_sha256": "8acbf9d3566c9ae3e3c8956cee2943d3c5fab5d99e6509433405d23d6c220463",
+  "environment_revision": "official-images-not-materialized",
+  "evaluator_revision": "swebench-live-official-wrapper-v1",
+  "model_id": "protocol-only",
+  "model_parameters": {
+    "temperature": 0.0
+  },
+  "model_revision": "not-a-model-baseline",
+  "network_policy": "deny",
+  "prompt_revision": "swebench-live-task-v1",
+  "random_seed": 7,
+  "schema_version": 1,
+  "split": "lite",
+  "tasks": [
+    {
+      "assets": [
+        {
+          "sha256": "7ee0a75c41bfc954fd441b67ce738fc5c1cbae00721c4e30e7db4d893057c9ab",
+          "uri": "hf://datasets/SWE-bench-Live/SWE-bench-Live/data/lite-00000-of-00001.parquet"
+        }
+      ],
+      "task_id": "aws-cloudformation__cfn-lint-3767"
+    },
+    {
+      "assets": [
+        {
+          "sha256": "7ee0a75c41bfc954fd441b67ce738fc5c1cbae00721c4e30e7db4d893057c9ab",
+          "uri": "hf://datasets/SWE-bench-Live/SWE-bench-Live/data/lite-00000-of-00001.parquet"
+        }
+      ],
+      "task_id": "python-babel__babel-1141"
+    },
+    {
+      "assets": [
+        {
+          "sha256": "7ee0a75c41bfc954fd441b67ce738fc5c1cbae00721c4e30e7db4d893057c9ab",
+          "uri": "hf://datasets/SWE-bench-Live/SWE-bench-Live/data/lite-00000-of-00001.parquet"
+        }
+      ],
+      "task_id": "projectmesa__mesa-2394"
+    }
+  ],
+  "tool_config_revision": "coding-tools-v1"
+}

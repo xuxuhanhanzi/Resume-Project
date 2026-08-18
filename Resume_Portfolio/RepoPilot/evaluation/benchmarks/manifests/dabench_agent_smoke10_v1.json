@@ -1,0 +1,30 @@
+{
+  "benchmark_id": "infiagent_dabench_dev",
+  "dataset_revision": "b455d578e30fee513abd79936cbdf7a6de026cb5",
+  "docker_image_id": "sha256:fc82eedb08c10ba2471b62781d34edf8a5e70bc788bf5defb38fc6546ee302dd",
+  "evaluator_revision": "dabench-closed-form-v1",
+  "model_id": "qwen2.5:7b",
+  "model_revision": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+  "network_policy": "deny",
+  "random_seed": 7,
+  "schema_version": 1,
+  "split": "dev",
+  "tables": {
+    "GODREJIND.csv": "55770473647050ba8f11d46108aac81f38df600e8261b105321fffd5c5a6ecec",
+    "test_ave.csv": "411cf03455d6026823fbd3ab65e2839075a22f9a5c088b85aef0d272d79cca00",
+    "unemployement_industry.csv": "c6fce742e7177c3ea07f5080dac8a54fcf8069c9bfab11012a4d9e5e1ac94dd9"
+  },
+  "task_ids": [
+    "dabench-dev-0000",
+    "dabench-dev-0005",
+    "dabench-dev-0006",
+    "dabench-dev-0007",
+    "dabench-dev-0008",
+    "dabench-dev-0009",
+    "dabench-dev-0010",
+    "dabench-dev-0011",
+    "dabench-dev-0014",
+    "dabench-dev-0023"
+  ],
+  "temperature": 0.0
+}

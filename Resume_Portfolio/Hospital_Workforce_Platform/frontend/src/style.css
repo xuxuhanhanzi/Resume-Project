@@ -1,0 +1,5 @@
+:root { font-family: Inter, "Microsoft YaHei", sans-serif; color: #17324d; background: #f4f8fb; }
+* { box-sizing: border-box; } body { margin: 0; } main { max-width: 1060px; margin: auto; padding: 64px 24px; }
+header { margin-bottom: 42px; } h1 { margin: 8px 0; font-size: clamp(2rem, 6vw, 4rem); } .eyebrow { color: #287d6c; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; } button { border: 1px solid #dce7ef; background: white; padding: 22px; border-radius: 14px; text-align: left; cursor: pointer; min-height: 135px; } button strong, button span { display: block; } button span { margin-top: 10px; color: #526a7d; line-height: 1.55; } button.active { border-color: #287d6c; box-shadow: 0 10px 30px #1c66531a; }
+.panel { margin-top: 28px; background: #17324d; color: #eff8ff; border-radius: 16px; padding: 32px; } .panel a { color: #87dcc8; }

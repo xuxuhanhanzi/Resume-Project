@@ -1,0 +1,9 @@
+{
+  "improved_scenes": 6,
+  "mean_risk_delta": -2.465440311852316,
+  "median_risk_delta": -1.0901145393245157,
+  "metric_scope": "paired_internal_risk_not_navsim",
+  "paired_scenes": 12,
+  "regressed_scenes": 6,
+  "selection_changed_scenes": 6
+}

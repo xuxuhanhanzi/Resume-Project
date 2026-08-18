@@ -1,0 +1,13 @@
+{
+  "claim_boundary": "template views are not independent unique QA records",
+  "grpo_minimum_1500_met": true,
+  "grpo_prompts": 1763,
+  "grpo_sha256": "eab7b4e929a77da29ad98d7d110b88ec2c32df69ee73de892b2eaa966d9d8b6a",
+  "image_path_mode": "project_relative",
+  "schema_version": 1,
+  "sft_minimum_3000_met": true,
+  "sft_sequences": 3526,
+  "sft_sha256": "fa3ac2ebbd179d5efd8d436a726ad9197e37351e5b17b979fb5474eddfd5548f",
+  "sft_template_views_per_record": 2,
+  "unique_strict_records": 1763
+}

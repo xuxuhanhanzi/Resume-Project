@@ -1,0 +1,2 @@
+# Optional Stage 1 reference implementation; the ForgeLLM byte-BPE core has no runtime dependency.
+tokenizers==0.22.2

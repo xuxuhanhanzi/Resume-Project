@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "experiment_scope": "local_synthetic_diagnostic_not_navsim",
+  "scenes_per_run": 1200,
+  "runs": 17,
+  "evaluated_scene_runs": 20400,
+  "failed_scene_runs": 0,
+  "k_sweep": {
+    "seeds": [17, 42, 2026],
+    "candidate_counts": [1, 2, 4, 8],
+    "collision_failures_per_1200": {"k1": 600, "k2": 300, "k4": 0, "k8": 0},
+    "declared_mean_latency_ms": {"k1": 4.0, "k2": 8.0, "k4": 16.0, "k8": 32.0}
+  },
+  "threshold_sweep": {
+    "seed": 17,
+    "risk_thresholds": [4.0, 8.0, 13.8, 16.0, 20.0],
+    "selected_diagnostic_threshold": 13.8,
+    "selected_slow_route_rate": 0.25,
+    "selected_collision_failures": 300,
+    "selected_declared_mean_latency_ms": 7.5
+  },
+  "raw_summary_sha256": "f692fbd05e65f134f0cbbf283125e93019733248e26f704d92f7160410626f65",
+  "raw_evidence_manifest_sha256": "9e03ee69a79126bfab03bf213ee07564b51457f1b241c1e72f73381c823ec242",
+  "claim_boundary": "CPU synthetic diagnostic only; no NAVSIM, PDMS, real-model latency or road-safety claim"
+}

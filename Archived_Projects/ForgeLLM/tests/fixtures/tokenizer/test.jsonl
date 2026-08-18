@@ -1,0 +1,5 @@
+{"id":"test-en-01","subset":"english","text":"deterministic merges make artifacts reproducible"}
+{"id":"test-zh-01","subset":"chinese","text":"组合字符 é 与预组字符 é 必须分别往返。"}
+{"id":"test-emoji-01","subset":"emoji","text":"🙂🚀🧠 byte sequences round-trip exactly"}
+{"id":"test-empty-01","subset":"edge","text":""}
+{"id":"test-space-01","subset":"edge","text":"  leading and trailing spaces  "}

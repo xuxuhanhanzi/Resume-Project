@@ -1,0 +1,7 @@
+[execution]
+network = "deny"
+allow_arbitrary_shell = false
+require_container_for_untrusted_code = true
+
+[approval]
+high_risk_paths = [".github", "deploy", "Dockerfile", "requirements", "pyproject.toml"]

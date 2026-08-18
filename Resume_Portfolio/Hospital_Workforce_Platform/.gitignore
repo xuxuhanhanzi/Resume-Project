@@ -1,0 +1,22 @@
+# Java
+target/
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Local environment
+.env
+*.local
+.tools/
+
+# OS
+.DS_Store
+Thumbs.db

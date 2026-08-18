@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "experiment_scope": "cpu_fixed_tensor_algorithm_diagnostic_not_model_training",
+  "seeds": [17, 42, 2026],
+  "steps_per_seed": 200,
+  "groups_per_step": 32,
+  "group_size": 4,
+  "all_advantages_finite": true,
+  "checkpoint_resume_final_state_exact_all_seeds": true,
+  "final_lambda_evidence": {"17": 0.24616043243098923, "42": 0.24825596069021166, "2026": 0.24690062118645364},
+  "final_lambda_operation": {"17": 0.23523231928162366, "42": 0.23607515851617636, "2026": 0.2365138588441232},
+  "raw_summary_sha256": "b3f6059c4d511647ee3a7f49ad20afba6e7917bc0b0829c84af599d414ee2705",
+  "claim_boundary": "deterministic CPU tensor diagnostic; not model training or quality evidence"
+}

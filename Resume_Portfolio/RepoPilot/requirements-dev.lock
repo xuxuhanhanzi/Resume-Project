@@ -1,0 +1,5 @@
+PyYAML==6.0.3
+mypy==1.11.2
+pytest==8.4.2
+ruff==0.15.21
+types-PyYAML==6.0.12.20250915

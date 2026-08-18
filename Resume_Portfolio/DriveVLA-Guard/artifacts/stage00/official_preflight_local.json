@@ -1,0 +1,123 @@
+{
+  "blockers": [
+    "invalid_path:checkpoint",
+    "invalid_path:qwen_model",
+    "invalid_path:json_data",
+    "invalid_path:sensor_data",
+    "invalid_path:metric_cache",
+    "missing_module:torch",
+    "missing_module:transformers",
+    "missing_module:qwen_vl_utils",
+    "missing_module:hydra",
+    "missing_module:nuplan",
+    "missing_module:navsim",
+    "insufficient_vram:8188MiB<24576MiB"
+  ],
+  "checkpoint_license_metadata": "unspecified_on_model_card",
+  "checkpoint_repository_size_gb": 16.3,
+  "expected_upstream_commit": "ba34eed74ce6729e7986592d0e66cbaca397b4fa",
+  "gpu": {
+    "available": true,
+    "capacity_ok": false,
+    "devices": [
+      {
+        "driver_version": "610.74",
+        "memory_total_mib": 8188.0,
+        "name": "NVIDIA GeForce RTX 4070 Laptop GPU"
+      }
+    ],
+    "minimum_required_mib": 24576.0,
+    "raw": "NVIDIA GeForce RTX 4070 Laptop GPU, 8188 MiB, 610.74"
+  },
+  "modules": {
+    "hydra": {
+      "available": false,
+      "version": null
+    },
+    "navsim": {
+      "available": false,
+      "version": null
+    },
+    "nuplan": {
+      "available": false,
+      "version": null
+    },
+    "qwen_vl_utils": {
+      "available": false,
+      "version": null
+    },
+    "torch": {
+      "available": false,
+      "version": null
+    },
+    "transformers": {
+      "available": false,
+      "version": null
+    }
+  },
+  "paths": {
+    "autovla_root": {
+      "exists": true,
+      "expected_kind": "directory",
+      "kind_ok": true,
+      "path": "D:\\Users\\27475\\Desktop\\Resume_Project\\Resume_Portfolio\\DriveVLA-Guard\\third_party\\AutoVLA"
+    },
+    "checkpoint": {
+      "exists": false,
+      "expected_kind": "file",
+      "kind_ok": false,
+      "path": null
+    },
+    "json_data": {
+      "exists": false,
+      "expected_kind": "file_or_directory",
+      "kind_ok": false,
+      "path": null
+    },
+    "metric_cache": {
+      "exists": false,
+      "expected_kind": "directory",
+      "kind_ok": false,
+      "path": null
+    },
+    "model_config": {
+      "exists": true,
+      "expected_kind": "file",
+      "kind_ok": true,
+      "path": "D:\\Users\\27475\\Desktop\\Resume_Project\\Resume_Portfolio\\DriveVLA-Guard\\third_party\\AutoVLA\\config\\eval\\qwen2.5-vl-3B-nusc-sft-eval.yaml"
+    },
+    "qwen_model": {
+      "exists": false,
+      "expected_kind": "directory",
+      "kind_ok": false,
+      "path": null
+    },
+    "sensor_data": {
+      "exists": false,
+      "expected_kind": "directory",
+      "kind_ok": false,
+      "path": null
+    }
+  },
+  "platform": "Windows-11-10.0.22631-SP0",
+  "python": "3.12.3 | packaged by conda-forge | (main, Apr 15 2024, 18:20:11) [MSC v.1938 64 bit (AMD64)]",
+  "python_executable": "D:\\Users\\27475\\Desktop\\Resume_Project\\Resume_Portfolio\\DriveVLA-Guard\\.venv\\Scripts\\python.exe",
+  "ready": false,
+  "upstream": {
+    "codebook_sha256": "e6bf8eff32497eaefca66f488dda1edefe97ed2696d1d23c01839dc27422408e",
+    "commit": "ba34eed74ce6729e7986592d0e66cbaca397b4fa",
+    "license_class": "academic_noncommercial_nontransferable",
+    "ready": true,
+    "redistribution_allowed": false,
+    "required_files": {
+      "LICENSE": true,
+      "README.md": true,
+      "codebook_cache/agent_vocab.pkl": true,
+      "models/action_tokenizer.py": true,
+      "models/autovla.py": true,
+      "navsim/navsim/agents/autovla_agent.py": true
+    },
+    "root": "D:\\Users\\27475\\Desktop\\Resume_Project\\Resume_Portfolio\\DriveVLA-Guard\\third_party\\AutoVLA",
+    "upstream": "https://github.com/ucla-mobility/AutoVLA"
+  }
+}

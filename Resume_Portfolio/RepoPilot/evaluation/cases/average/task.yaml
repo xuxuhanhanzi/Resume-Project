@@ -1,0 +1,14 @@
+task_id: micro_average
+workspace: .
+problem_statement: average returns the sum instead of the arithmetic mean.
+language: python
+allowed_paths: [module.py]
+forbidden_paths: [verify.py]
+test_command: [python, verify.py]
+network_policy: deny
+max_iterations: 10
+max_tool_calls: 24
+token_budget: 16000
+time_budget_seconds: 300
+max_changed_files: 1
+trusted_fixture: true

@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "forgemm"
+version = "0.2.3"
+description = "Faithful chart reasoning post-training for Qwen2.5-VL with ms-swift"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "numpy>=1.26",
+  "pillow>=10.0",
+  "pyarrow>=15.0",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.11,<2",
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.6",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-config --strict-markers"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src", "tests", "scripts"]
+
+[[tool.mypy.overrides]]
+module = ["pyarrow", "pyarrow.*"]
+ignore_missing_imports = true

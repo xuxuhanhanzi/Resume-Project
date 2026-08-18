@@ -1,0 +1,8 @@
+ARG BASE_IMAGE=python@sha256:dd29372629eeba2dd003fd9e9d35a5b8236c44727875a0364254b5127af88e65
+FROM ${BASE_IMAGE}
+
+RUN useradd --create-home --uid 10001 runner
+WORKDIR /workspace
+USER 10001:10001
+
+ENTRYPOINT []

@@ -1,0 +1,52 @@
+# Local environments and generated artifacts
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Task workspaces, evaluation artifacts, caches and logs
+artifacts/*
+!artifacts/.gitkeep
+workspaces/
+repositories/
+cache/
+outputs/
+logs/
+
+# External submodules and large data (not committed to root repo)
+external/
+build/
+evaluation/benchmarks/workspaces/
+evaluation/benchmarks/corpora/
+
+# Gold / evaluator-only data (must not enter version control)
+gold.repopilot-gold-*.json
+
+# Downloaded gold datasets for SWE-bench-Live / FRAMES / DABench prep
+evaluation/benchmarks/data/
+
+# Devcheck / one-off quality-gate scratch outputs (regenerable)
+dc_*.txt
+*_out.txt
+devcheck_out.txt
+dpo_run.log
+mypy_run.txt
+pytest*.txt
+t_out.txt
+tc_out.txt
+
+
+# Python build artifacts
+*.egg-info/
+dist/
+
+# Local secrets and editor files
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/

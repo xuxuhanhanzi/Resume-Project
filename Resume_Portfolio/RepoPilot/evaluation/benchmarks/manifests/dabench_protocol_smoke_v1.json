@@ -1,0 +1,53 @@
+{
+  "benchmark_id": "infiagent_dabench_dev",
+  "budget": {
+    "max_iterations": 6,
+    "max_tool_calls": 12,
+    "max_total_tokens": 8000,
+    "max_wall_seconds": 180.0
+  },
+  "dataset_revision": "b455d578e30fee513abd79936cbdf7a6de026cb5",
+  "dependency_lock_sha256": "8acbf9d3566c9ae3e3c8956cee2943d3c5fab5d99e6509433405d23d6c220463",
+  "environment_revision": "dabench-python-docker-v1",
+  "evaluator_revision": "dabench-closed-form-v1",
+  "model_id": "oracle-protocol-fixture",
+  "model_parameters": {
+    "temperature": 0.0
+  },
+  "model_revision": "not-a-model-baseline",
+  "network_policy": "deny",
+  "prompt_revision": "dabench-task-v1",
+  "random_seed": 7,
+  "schema_version": 1,
+  "split": "dev",
+  "tasks": [
+    {
+      "assets": [
+        {
+          "sha256": "411cf03455d6026823fbd3ab65e2839075a22f9a5c088b85aef0d272d79cca00",
+          "uri": "hf://datasets/infiagent/DABench/da-dev-tables/test_ave.csv"
+        }
+      ],
+      "task_id": "dabench-dev-0000"
+    },
+    {
+      "assets": [
+        {
+          "sha256": "411cf03455d6026823fbd3ab65e2839075a22f9a5c088b85aef0d272d79cca00",
+          "uri": "hf://datasets/infiagent/DABench/da-dev-tables/test_ave.csv"
+        }
+      ],
+      "task_id": "dabench-dev-0005"
+    },
+    {
+      "assets": [
+        {
+          "sha256": "411cf03455d6026823fbd3ab65e2839075a22f9a5c088b85aef0d272d79cca00",
+          "uri": "hf://datasets/infiagent/DABench/da-dev-tables/test_ave.csv"
+        }
+      ],
+      "task_id": "dabench-dev-0007"
+    }
+  ],
+  "tool_config_revision": "dabench-table-python-tools-v1"
+}
