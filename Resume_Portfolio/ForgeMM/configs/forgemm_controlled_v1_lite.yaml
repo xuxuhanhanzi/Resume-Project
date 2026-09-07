@@ -1,0 +1,59 @@
+experiment_id: forgemm-controlled-v1-lite
+registration_date: "2026-08-24"
+supersedes_for_this_study: "ChartQA strict-evidence Stage 4 only"
+does_not_supersede: "frozen ChartQA/ChartQAPro answer-generalization evaluations"
+
+dataset:
+  name: ForgeMM-Controlled-v1-Lite
+  generator_version: forgemm-controlled-pillow-1.0.0
+  root_seed: 20260824
+  split_counts:
+    train: 5000
+    val: 600
+    test: 1000
+  test_is_frozen_before_training: true
+  visual_oracle: generated mark bbox + value + source id + executable operation
+  natural_chart_claim_boundary: "ChartQA and ChartQAPro report answer generalization only."
+
+hardware:
+  platform: local WSL2 Ubuntu
+  gpu: RTX 4070 Laptop
+  total_vram_mib: 8188
+  required_free_vram_mib_before_smoke: 6500
+  system_ram_gib: 32
+
+sft:
+  model: Qwen/Qwen2.5-VL-3B-Instruct
+  quantization: NF4 4-bit
+  compute_dtype: bfloat16
+  freeze_vit: true
+  freeze_aligner: true
+  lora_rank: 8
+  lora_alpha: 16
+  max_pixels: 200704
+  oom_fallback_max_pixels: 112896
+  max_length: 1024
+  max_completion_length: 160
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 16
+  gradient_checkpointing: true
+
+grpo:
+  num_generations: 2
+  generation_batch_size: 1
+  use_vllm: false
+  max_completion_length: 160
+  gradient_checkpointing: true
+  reward_functions:
+    - forgemm_controlled_task
+    - forgemm_controlled_evidence
+    - forgemm_controlled_operation
+
+formal_rules:
+  smoke_must_pass_before_training: true
+  all_variants_share_model_and_memory_settings: true
+  seeds: [17, 42, 2026]
+  first_full_run: E0 answer-SFT vs structured-SFT
+  grpo_gate: "structured SFT must pass JSON/visual protocol and non-inferiority gate"
+  primary_metric: controlled visual full-pass rate
+  prohibited_claim: "Do not call ChartQA table-derived signals visual evidence validity."

@@ -119,13 +119,24 @@ def main() -> int:
         if line.strip()
     ]
     workspace_root = Path(arguments.workspace_root) / REVISION
+    evaluation_root = workspace_root / "evaluations" / Path(arguments.predictions).parent.name
 
     resolved = 0
     report = []
     for pred in predictions:
         instance_id = pred["instance_id"]
         model_patch = pred.get("model_patch", "")
-        workspace = (workspace_root / instance_id).resolve(strict=True)
+        base_workspace = (workspace_root / instance_id).resolve(strict=True)
+        workspace = evaluation_root / instance_id
+        if workspace.exists():
+            raise FileExistsError(f"dedicated evaluation workspace already exists: {workspace}")
+        workspace.parent.mkdir(parents=True, exist_ok=True)
+        subprocess.run(
+            ["git", "clone", "--local", "--no-hardlinks", str(base_workspace), str(workspace)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
         row = meta[instance_id]
         image = f"{arguments.image_prefix}.{instance_id.replace('__', '_1776_')}:latest"
         fail_to_pass = _as_list(row["FAIL_TO_PASS"])
@@ -167,17 +178,8 @@ def main() -> int:
             ftp_out = (error.stdout or "") + (error.stderr or "")
             ptp_out = ""
         finally:
-            # restore workspace to base_commit
-            subprocess.run(
-                ["git", "-c", "core.longpaths=true", "-C", str(workspace), "checkout", "--", "."],
-                capture_output=True,
-                text=True,
-            )
-            subprocess.run(
-                ["git", "-c", "core.longpaths=true", "-C", str(workspace), "clean", "-fd", "."],
-                capture_output=True,
-                text=True,
-            )
+            # Keep the dedicated evaluator workspace unchanged as evidence.
+            pass
         if task_resolved:
             resolved += 1
         report.append(

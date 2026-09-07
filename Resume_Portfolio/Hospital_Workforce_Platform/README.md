@@ -1,5 +1,9 @@
 # Hospital Workforce and Scheduling Platform
 
+WSL2 实验 PC 可通过 `scripts/setup_experiment_pc.sh` 构建服务，再由
+`scripts/run_experiment_pc.sh` 自动执行 Compose 验收与 k6 压测；作品集根目录的统一编排器
+会负责调用并保存阶段日志。
+
 面向 Java 后端求职的医院人员与排班管理平台。项目以模块化单体实现组织人事、排班、薪资、招聘、培训、权限和审计，并提供容器化、本地监控、自动化测试及性能测试脚本。
 
 ## 核心能力

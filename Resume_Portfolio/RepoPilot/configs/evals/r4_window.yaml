@@ -1,0 +1,13 @@
+schema_version: 1
+experiment: R4-B0
+variant: window
+dataset: LongMemEval_S_cleaned
+split_protocol: session_grouped_20_40_40_final_holdout
+fixed_controls:
+  reader_model: qwen2.5_7b_local
+  answer_token_budget: 512
+  visible_memory_token_budget: 4096
+  temperature: 0.0
+memory:
+  retriever: none
+  window_turns: 20

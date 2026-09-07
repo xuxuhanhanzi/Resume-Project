@@ -1,0 +1,7 @@
+schema_version: 1
+experiment: R1-C
+variant: routed_hybrid_with_symbol_test_expansion
+inherits: r1_routed_hybrid.yaml
+retrieval:
+  expansion: python_ast_symbol_and_test_adjacency_v1
+  non_python_fallback: lexical_path_only

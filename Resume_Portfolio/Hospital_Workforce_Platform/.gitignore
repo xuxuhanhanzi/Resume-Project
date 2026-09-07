@@ -16,6 +16,7 @@ frontend/dist/
 .env
 *.local
 .tools/
+docs/experiments/artifacts/experiment-pc/
 
 # OS
 .DS_Store

@@ -39,3 +39,18 @@ jobs:
         env:
           REPOPILOT_RUN_DOCKER_SECURITY: "1"
           REPOPILOT_SANDBOX_IMAGE: repopilot-sandbox:20260814
+
+  windows-acceptance:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+          .\scripts\acceptance_windows.ps1

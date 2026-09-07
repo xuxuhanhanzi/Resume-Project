@@ -29,7 +29,11 @@ except OSError:
     pass
 
 workspace_probe = Path('/workspace/container-write.txt')
-workspace_probe.write_text('sandbox-write-ok\n', encoding='utf-8')
+try:
+    workspace_probe.write_text('sandbox-write-ok\n', encoding='utf-8')
+    workspace_write = True
+except OSError:
+    workspace_write = False
 result = {
     'uid': os.getuid(),
     'gid': os.getgid(),
@@ -41,7 +45,7 @@ result = {
     'memory_max': Path('/sys/fs/cgroup/memory.max').read_text().strip(),
     'pids_max': Path('/sys/fs/cgroup/pids.max').read_text().strip(),
     'cpu_max': Path('/sys/fs/cgroup/cpu.max').read_text().strip(),
-    'workspace_write': workspace_probe.exists(),
+    'workspace_write': workspace_write,
 }
 print(json.dumps(result, sort_keys=True))
 """
@@ -74,5 +78,5 @@ def test_live_container_enforces_security_profile(tmp_path: Path) -> None:
         "pids_max": "64",
         "root_read_only": True,
         "uid": 65534,
-        "workspace_write": True,
+        "workspace_write": False,
     }

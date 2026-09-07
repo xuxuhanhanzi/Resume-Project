@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "suite_id": "repopilot-synthetic-dev-v1",
+  "cases": [
+    {
+      "task_id": "clamp-upper-bound",
+      "problem_statement": "Fix src/bounds.py so clamp(value, lower, upper) returns value constrained inclusively to the supplied lower and upper bounds. Keep the public function signature unchanged and run the visible tests.",
+      "source_path": "src/bounds.py",
+      "source": "def clamp(value: int, lower: int, upper: int) -> int:\n    if lower > upper:\n        raise ValueError(\"lower must not exceed upper\")\n    return max(lower, min(value, lower))\n",
+      "test_path": "tests/test_bounds.py",
+      "test": "from pathlib import Path\nimport sys\n\nsys.path.insert(0, str(Path(__file__).parents[1] / \"src\"))\nfrom bounds import clamp\n\n\ndef test_clamp_respects_both_bounds() -> None:\n    assert clamp(-2, 0, 10) == 0\n    assert clamp(4, 0, 10) == 4\n    assert clamp(12, 0, 10) == 10\n"
+    },
+    {
+      "task_id": "normalize-whitespace",
+      "problem_statement": "Fix src/text.py so normalize_whitespace collapses every run of Unicode whitespace and removes leading/trailing whitespace. Preserve the function name and run the visible tests.",
+      "source_path": "src/text.py",
+      "source": "def normalize_whitespace(value: str) -> str:\n    return \" \".join(value.split(\" \"))\n",
+      "test_path": "tests/test_text.py",
+      "test": "from pathlib import Path\nimport sys\n\nsys.path.insert(0, str(Path(__file__).parents[1] / \"src\"))\nfrom text import normalize_whitespace\n\n\ndef test_normalize_whitespace() -> None:\n    assert normalize_whitespace(\"  alpha\\tbeta   gamma  \") == \"alpha beta gamma\"\n"
+    },
+    {
+      "task_id": "parse-boolean-token",
+      "problem_statement": "Fix src/options.py so parse_enabled accepts only the documented case-insensitive tokens true/false, yes/no, and 1/0 after surrounding whitespace is removed. It must raise ValueError for any other token. Run the visible tests.",
+      "source_path": "src/options.py",
+      "source": "def parse_enabled(value: str) -> bool:\n    return bool(value)\n",
+      "test_path": "tests/test_options.py",
+      "test": "from pathlib import Path\nimport sys\n\nimport pytest\n\nsys.path.insert(0, str(Path(__file__).parents[1] / \"src\"))\nfrom options import parse_enabled\n\n\ndef test_parse_enabled_accepts_documented_tokens() -> None:\n    assert parse_enabled(\" YES \") is True\n    assert parse_enabled(\"0\") is False\n\n\ndef test_parse_enabled_rejects_unknown_token() -> None:\n    with pytest.raises(ValueError):\n        parse_enabled(\"sometimes\")\n"
+    },
+    {
+      "task_id": "inclusive-range",
+      "problem_statement": "Fix src/ranges.py so values_between returns every integer from start through stop, including both endpoints. Keep ascending behavior and run the visible tests.",
+      "source_path": "src/ranges.py",
+      "source": "def values_between(start: int, stop: int) -> list[int]:\n    return list(range(start, stop))\n",
+      "test_path": "tests/test_ranges.py",
+      "test": "from pathlib import Path\nimport sys\n\nsys.path.insert(0, str(Path(__file__).parents[1] / \"src\"))\nfrom ranges import values_between\n\n\ndef test_values_between_is_inclusive() -> None:\n    assert values_between(3, 3) == [3]\n    assert values_between(2, 5) == [2, 3, 4, 5]\n"
+    }
+  ]
+}

@@ -110,6 +110,7 @@ def test_multi_agent_harness_executes_verified_task_end_to_end(tmp_path: Path) -
     assert planner.requests[0].tools == ()
     assert reviewer.requests[0].tools == ()
     assert "return left - right" in reviewer.requests[0].messages[1].content
+    assert "Read-only planner plan" in executor_provider.requests[0].messages[1].content
     stored = MultiAgentCheckpointStore(
         tmp_path / "multi_artifacts" / "complete" / "checkpoint.json"
     ).load()

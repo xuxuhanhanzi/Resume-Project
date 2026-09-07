@@ -1,4 +1,0 @@
-[tokenizer]
-vocab_size = 320
-min_pair_frequency = 2
-

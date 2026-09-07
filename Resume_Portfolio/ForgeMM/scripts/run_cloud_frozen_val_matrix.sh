@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="${FORGEMM_ROOT:-/root/autodl-tmp/ForgeMM}"
-PYTHON_ENV="${FORGEMM_ENV:-/root/autodl-tmp/envs/forgemm}"
-MODEL="${FORGEMM_MODEL:-/root/autodl-tmp/models/Qwen2.5-VL-3B-Instruct}"
-DATASET="${FORGEMM_VAL_DATASET:-${ROOT}/artifacts/runs/cloud_stage04/data/chartqa_val_strict_eval.jsonl}"
-RUNS="${ROOT}/artifacts/runs/cloud_stage04"
+ROOT="${FORGEMM_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+PYTHON_ENV="${FORGEMM_ENV:-${HOME}/.venvs/forgemm}"
+MODEL="${FORGEMM_MODEL:-${HOME}/resume-project-assets/forgemm/models/Qwen2.5-VL-3B-Instruct}"
+RUNS="${FORGEMM_RUN_DIR:-${ROOT}/artifacts/runs/cloud_stage04}"
+DATASET="${FORGEMM_VAL_DATASET:-${RUNS}/data/chartqa_val_strict_eval.jsonl}"
 SAMPLES="$(wc -l < "${DATASET}")"
 
 source "${PYTHON_ENV}/bin/activate"
@@ -34,7 +34,7 @@ run_eval() {
   fi
 
   set +e
-  python "${PYTHON_ENV}/lib/python3.12/site-packages/swift/cli/infer.py" \
+  swift infer \
     --model "${MODEL}" \
     "${adapter_args[@]}" \
     --infer_backend transformers \

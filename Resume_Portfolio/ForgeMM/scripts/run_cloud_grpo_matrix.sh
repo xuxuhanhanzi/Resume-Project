@@ -2,11 +2,12 @@
 set -euo pipefail
 
 MODE="${1:-quick}"
-ROOT="${FORGEMM_ROOT:-/root/autodl-tmp/ForgeMM}"
-PYTHON_ENV="${FORGEMM_ENV:-/root/autodl-tmp/envs/forgemm}"
-MODEL="${FORGEMM_MODEL:-/root/autodl-tmp/models/Qwen2.5-VL-3B-Instruct}"
-ADAPTER="${FORGEMM_ADAPTER:-${ROOT}/artifacts/runs/cloud_stage04/e2_structured_sft_1000/checkpoint-1000}"
-DATASET="${FORGEMM_GRPO_DATASET:-${ROOT}/artifacts/runs/cloud_stage04/data/grpo_train.jsonl}"
+ROOT="${FORGEMM_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+PYTHON_ENV="${FORGEMM_ENV:-${HOME}/.venvs/forgemm}"
+MODEL="${FORGEMM_MODEL:-${HOME}/resume-project-assets/forgemm/models/Qwen2.5-VL-3B-Instruct}"
+RUNS="${FORGEMM_RUN_DIR:-${ROOT}/artifacts/runs/cloud_stage04}"
+ADAPTER="${FORGEMM_ADAPTER:-${RUNS}/e2_structured_sft_1000/checkpoint-1000}"
+DATASET="${FORGEMM_GRPO_DATASET:-${RUNS}/data/grpo_train.jsonl}"
 
 case "${MODE}" in
   quick)
@@ -33,9 +34,9 @@ run_variant() {
   local variant="$1"
   local seed="$2"
   shift 2
-  local output="${ROOT}/artifacts/runs/cloud_stage04/${MODE}_${variant}_seed${seed}"
+  local output="${RUNS}/${MODE}_${variant}_seed${seed}"
   set +e
-  python "${PYTHON_ENV}/lib/python3.12/site-packages/swift/cli/rlhf.py" \
+  swift rlhf \
     --rlhf_type grpo \
     --model "${MODEL}" \
     --adapters "${ADAPTER}" \

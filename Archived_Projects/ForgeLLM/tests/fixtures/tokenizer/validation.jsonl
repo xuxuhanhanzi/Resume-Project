@@ -1,3 +1,0 @@
-{"id":"validation-en-01","subset":"english","text":"a tokenizer should preserve every UTF-8 byte"}
-{"id":"validation-zh-01","subset":"chinese","text":"未见文本也必须能够无损还原。"}
-{"id":"validation-mix-01","subset":"mixed","text":"validation ✅ 保持 emoji 和空格 exact"}

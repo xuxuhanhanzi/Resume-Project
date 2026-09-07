@@ -6,6 +6,7 @@ import ast
 import difflib
 import re
 from pathlib import Path
+from typing import TypedDict
 
 from repopilot.core.contracts import (
     ErrorType,
@@ -21,8 +22,32 @@ from repopilot.security.paths import (
     task_path_is_visible,
 )
 from repopilot.tools.base import Tool, ToolContext
+from repopilot.tools.git import default_git_tools
+from repopilot.tools.process import default_process_tools
+from repopilot.tools.shell import ShellTool
+from repopilot.tools.worktree import default_worktree_tools
 
-_IGNORED_PARTS = {".git", ".venv", "__pycache__", ".pytest_cache", ".mypy_cache"}
+_IGNORED_PARTS = {
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".repopilot",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "node_modules",
+}
+
+
+class SnapshotLimitError(ValueError):
+    """Raised before an unbounded workspace snapshot consumes a whole session startup."""
+
+
+class _SnapshotOptions(TypedDict):
+    exclude_paths: tuple[str, ...]
+    max_files: int | None
+    max_total_bytes: int | None
 
 
 def _schema(properties: dict[str, JSONValue], required: list[str]) -> dict[str, JSONValue]:
@@ -48,12 +73,93 @@ def _error(call: ToolCall, error: Exception, *, recoverable: bool = False) -> To
     )
 
 
-def _iter_files(root: Path) -> list[Path]:
-    return sorted(
-        path
-        for path in root.rglob("*")
-        if path.is_file() and not any(part in _IGNORED_PARTS for part in path.parts)
-    )
+def _is_within(root: Path, candidate: Path) -> bool:
+    return candidate == root or root in candidate.parents
+
+
+def _is_excluded(path: Path, excluded_roots: tuple[Path, ...]) -> bool:
+    return any(_is_within(excluded, path) for excluded in excluded_roots)
+
+
+def _iter_files(
+    root: Path,
+    *,
+    excluded_roots: tuple[Path, ...] = (),
+    max_files: int | None = None,
+) -> list[Path]:
+    """Walk deterministically without descending into ignored or excluded subtrees."""
+    files: list[Path] = []
+    pending: list[Path] = [root]
+    while pending:
+        directory = pending.pop()
+        if _is_excluded(directory, excluded_roots):
+            continue
+        try:
+            children = sorted(
+                directory.iterdir(), key=lambda path: path.name.casefold(), reverse=True
+            )
+        except OSError:
+            continue
+        for path in children:
+            if (
+                path.name in _IGNORED_PARTS
+                or path.is_symlink()
+                or _is_excluded(path, excluded_roots)
+            ):
+                continue
+            try:
+                if path.is_file():
+                    if max_files is not None and len(files) >= max_files:
+                        raise SnapshotLimitError(
+                            f"snapshot exceeds the {max_files:,}-file safety limit"
+                        )
+                    files.append(path)
+                elif path.is_dir():
+                    pending.append(path)
+            except OSError:
+                continue
+    return sorted(files)
+
+
+def _iter_files_bounded(
+    root: Path,
+    *,
+    max_depth: int,
+    max_files: int,
+    excluded_roots: tuple[Path, ...] = (),
+) -> list[Path]:
+    """Walk only the requested subtree instead of filtering an unbounded rglob result."""
+    files: list[Path] = []
+    pending: list[tuple[Path, int]] = [(root, 0)]
+    while pending and len(files) < max_files:
+        directory, depth = pending.pop()
+        if _is_excluded(directory, excluded_roots):
+            continue
+        try:
+            children = sorted(
+                directory.iterdir(), key=lambda path: path.name.casefold(), reverse=True
+            )
+        except OSError:
+            continue
+        for path in children:
+            if (
+                path.name in _IGNORED_PARTS
+                or path.is_symlink()
+                or _is_excluded(path, excluded_roots)
+            ):
+                continue
+            try:
+                child_depth = depth + 1
+                if path.is_file():
+                    if child_depth <= max_depth:
+                        files.append(path)
+                elif path.is_dir() and child_depth < max_depth:
+                    pending.append((path, child_depth))
+            except OSError:
+                continue
+            if len(files) >= max_files:
+                break
+    return sorted(files)
 
 
 def capture_text_snapshot(
@@ -61,26 +167,83 @@ def capture_text_snapshot(
     *,
     include_paths: tuple[str, ...] | None = None,
     max_file_bytes: int = 1_000_000,
+    exclude_paths: tuple[str, ...] = (),
+    max_files: int | None = None,
+    max_total_bytes: int | None = None,
 ) -> dict[str, str]:
     """Capture a bounded text baseline for deterministic diffing."""
+    if max_file_bytes <= 0:
+        raise ValueError("max_file_bytes must be positive")
+    if max_files is not None and max_files <= 0:
+        raise ValueError("max_files must be positive when set")
+    if max_total_bytes is not None and max_total_bytes <= 0:
+        raise ValueError("max_total_bytes must be positive when set")
+    root = root.resolve(strict=True)
+    excluded_roots = tuple(
+        _resolve_snapshot_path(root, relative, strict=False) for relative in exclude_paths
+    )
     snapshot: dict[str, str] = {}
     candidates: set[Path] = set()
     for relative in include_paths or (".",):
-        selected = (root / relative).resolve(strict=True)
-        if (selected == root or root not in selected.parents) and selected != root:
-            raise ValueError("snapshot path escaped the workspace")
+        selected = _resolve_snapshot_path(root, relative, strict=True)
+        if _is_excluded(selected, excluded_roots):
+            continue
         if selected.is_file():
+            if (
+                max_files is not None
+                and selected not in candidates
+                and len(candidates) >= max_files
+            ):
+                raise SnapshotLimitError(f"snapshot exceeds the {max_files:,}-file safety limit")
             candidates.add(selected)
         else:
-            candidates.update(_iter_files(selected))
+            remaining = None if max_files is None else max_files - len(candidates)
+            candidates.update(
+                _iter_files(selected, excluded_roots=excluded_roots, max_files=remaining)
+            )
+    total_bytes = 0
     for path in sorted(candidates):
-        if path.stat().st_size > max_file_bytes:
+        try:
+            size = path.stat().st_size
+        except OSError:
             continue
+        if size > max_file_bytes:
+            continue
+        if max_total_bytes is not None and total_bytes + size > max_total_bytes:
+            raise SnapshotLimitError(f"snapshot exceeds the {max_total_bytes:,}-byte safety limit")
         try:
             snapshot[path.relative_to(root).as_posix()] = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
+        total_bytes += size
     return snapshot
+
+
+def _resolve_snapshot_path(root: Path, relative: str, *, strict: bool) -> Path:
+    candidate = Path(relative)
+    selected = candidate if candidate.is_absolute() else root / candidate
+    resolved = selected.resolve(strict=strict)
+    if not _is_within(root, resolved):
+        raise ValueError("snapshot path escaped the workspace")
+    return resolved
+
+
+def _snapshot_options(context: ToolContext) -> _SnapshotOptions:
+    return {
+        "exclude_paths": context.snapshot_exclude_paths,
+        "max_files": context.snapshot_max_files,
+        "max_total_bytes": context.snapshot_max_total_bytes,
+    }
+
+
+def _default_search_exclusions(context: ToolContext, root: Path) -> tuple[Path, ...]:
+    """Skip large reference trees only for an implicit workspace-wide search."""
+    if root != context.task.workspace.resolve():
+        return ()
+    return tuple(
+        _resolve_snapshot_path(root, relative, strict=False)
+        for relative in context.snapshot_exclude_paths
+    )
 
 
 class ListFilesTool:
@@ -107,15 +270,18 @@ class ListFilesTool:
             root = resolve_workspace_path(context.task, raw_path)
             if not root.is_dir():
                 raise ValueError("list_files path must be a directory")
-            files = []
-            for path in _iter_files(root):
+            files: list[str] = []
+            exclusions = _default_search_exclusions(context, root)
+            for path in _iter_files_bounded(
+                root,
+                max_depth=max_depth,
+                max_files=500,
+                excluded_roots=exclusions,
+            ):
                 if not task_path_is_visible(context.task, path):
                     continue
                 relative = path.relative_to(context.task.workspace)
-                if len(path.relative_to(root).parts) <= max_depth:
-                    files.append(relative.as_posix())
-                if len(files) >= 500:
-                    break
+                files.append(relative.as_posix())
             return ToolResult(call.call_id, call.name, True, {"files": files})
         except (OSError, ValueError) as error:
             return _error(call, error)
@@ -197,7 +363,11 @@ class SearchTextTool:
             seen: set[Path] = set()
             for raw_path in raw_paths:
                 root = resolve_workspace_path(context.task, raw_path)
-                candidates = [root] if root.is_file() else _iter_files(root)
+                candidates = (
+                    [root]
+                    if root.is_file()
+                    else _iter_files(root, excluded_roots=_default_search_exclusions(context, root))
+                )
                 for path in candidates:
                     if not task_path_is_visible(context.task, path):
                         continue
@@ -240,7 +410,10 @@ class FindSymbolTool:
         if not name.isidentifier():
             return _error(call, ValueError("name must be a Python identifier"))
         matches: list[dict[str, JSONValue]] = []
-        for path in _iter_files(context.task.workspace):
+        for path in _iter_files(
+            context.task.workspace,
+            excluded_roots=_default_search_exclusions(context, context.task.workspace),
+        ):
             if path.suffix != ".py" or not task_path_is_visible(context.task, path):
                 continue
             try:
@@ -299,7 +472,12 @@ class ApplyPatchTool:
             relative_path = path.relative_to(context.task.workspace).as_posix()
             old_text = str(call.arguments.get("old_text", ""))
             new_text = str(call.arguments.get("new_text", ""))
-            expected = int(call.arguments.get("expected_replacements", 1))
+            expected_value = call.arguments.get("expected_replacements", 1)
+            if isinstance(expected_value, bool) or not isinstance(expected_value, int):
+                raise ValueError("expected_replacements must be an integer")
+            expected = expected_value
+            if not 1 <= expected <= 20:
+                raise ValueError("expected_replacements must be between 1 and 20")
             if not old_text:
                 raise ValueError("old_text must not be empty")
             original_content = path.read_text(encoding="utf-8")
@@ -346,7 +524,9 @@ class ApplyPatchTool:
 
 def _changed_files(context: ToolContext) -> list[str]:
     current = capture_text_snapshot(
-        context.task.workspace, include_paths=context.task.allowed_paths
+        context.task.workspace,
+        include_paths=context.task.allowed_paths,
+        **_snapshot_options(context),
     )
     paths = set(context.baseline) | set(current)
     return sorted(path for path in paths if context.baseline.get(path) != current.get(path))
@@ -382,7 +562,10 @@ class RunTestsTool:
         command = (*context.task.test_command, *tuple(str(item) for item in raw_test_ids))
         try:
             result = await context.runner.run(
-                command, cwd=context.task.workspace, timeout_seconds=self.spec.timeout_seconds
+                command,
+                cwd=context.task.workspace,
+                timeout_seconds=self.spec.timeout_seconds,
+                cancellation=context.cancellation,
             )
         except (OSError, RuntimeError, PermissionError, ValueError) as error:
             return _error(call, error)
@@ -417,9 +600,14 @@ class GitDiffTool:
         )
 
     async def run(self, call: ToolCall, context: ToolContext) -> ToolResult:
-        current = capture_text_snapshot(
-            context.task.workspace, include_paths=context.task.allowed_paths
-        )
+        try:
+            current = capture_text_snapshot(
+                context.task.workspace,
+                include_paths=context.task.allowed_paths,
+                **_snapshot_options(context),
+            )
+        except (OSError, ValueError) as error:
+            return _error(call, error)
         chunks: list[str] = []
         for relative in sorted(set(context.baseline) | set(current)):
             before = context.baseline.get(relative, "").splitlines(keepends=True)
@@ -470,5 +658,9 @@ def default_coding_tools() -> list[Tool]:
         ApplyPatchTool(),
         RunTestsTool(),
         GitDiffTool(),
+        *default_git_tools(),
+        ShellTool(),
+        *default_process_tools(),
+        *default_worktree_tools(),
         InspectFailureTool(),
     ]

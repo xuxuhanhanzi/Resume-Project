@@ -22,11 +22,12 @@ from __future__ import annotations
 import asyncio
 import difflib
 import json
+import re
 import time
 from contextlib import suppress
 from dataclasses import dataclass, field, replace
 from enum import StrEnum
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Any, Protocol, cast
 from uuid import uuid4
 
@@ -37,6 +38,7 @@ from repopilot.core.contracts import (
     ModelRequest,
     RunStatus,
 )
+from repopilot.orchestration.pev import ReviewerStrategy, RiskSignals, reviewer_decision
 from repopilot.orchestration.routing import RouteTarget, RoutingDecision, RoutingMode, TaskRouter
 from repopilot.providers.base import ModelProvider
 from repopilot.task import PublicTaskSpec
@@ -109,6 +111,10 @@ class MultiAgentRunState:
     routing_reason: str = ""
     routing_confidence: float = 0.0
     routing_cascade: list[str] = field(default_factory=list)
+    reviewer_strategy: str = ReviewerStrategy.ALWAYS.value
+    reviewer_required: bool = False
+    reviewer_reasons: list[str] = field(default_factory=list)
+    reviewer_calls: int = 0
     messages: list[AgentMessage] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, JSONValue]:
@@ -128,6 +134,10 @@ class MultiAgentRunState:
             "routing_reason": self.routing_reason,
             "routing_confidence": self.routing_confidence,
             "routing_cascade": list(self.routing_cascade),
+            "reviewer_strategy": self.reviewer_strategy,
+            "reviewer_required": self.reviewer_required,
+            "reviewer_reasons": list(self.reviewer_reasons),
+            "reviewer_calls": self.reviewer_calls,
             "messages": [
                 {
                     "sender": message.sender,
@@ -181,6 +191,12 @@ class MultiAgentRunState:
             routing_cascade=[
                 str(item) for item in cast(list[JSONValue], data.get("routing_cascade", []))
             ],
+            reviewer_strategy=str(data.get("reviewer_strategy", ReviewerStrategy.ALWAYS.value)),
+            reviewer_required=bool(data.get("reviewer_required", False)),
+            reviewer_reasons=[
+                str(item) for item in cast(list[JSONValue], data.get("reviewer_reasons", []))
+            ],
+            reviewer_calls=int(cast(int, data.get("reviewer_calls", 0))),
             messages=messages,
         )
 
@@ -347,6 +363,7 @@ class MultiAgentHarness:
         router: TaskRouter | None = None,
         routing_provider: ModelProvider | None = None,
         route_bindings: dict[RouteTarget, RouteBinding] | None = None,
+        reviewer_strategy: ReviewerStrategy = ReviewerStrategy.ALWAYS,
     ) -> MultiAgentRunState:
         """Execute planner → runtime/verifier → reviewer with durable transitions.
 
@@ -359,6 +376,8 @@ class MultiAgentHarness:
             raise ValueError("artifacts_root is required for executable orchestration")
         if max_cycles <= 0:
             raise ValueError("max_cycles must be positive")
+        if not isinstance(reviewer_strategy, ReviewerStrategy):
+            raise ValueError("reviewer_strategy must be a ReviewerStrategy")
         actual_run_id = run_id or f"multi_{uuid4().hex[:12]}"
         run_dir = self.artifacts_root / actual_run_id
         checkpoint = MultiAgentCheckpointStore(run_dir / "checkpoint.json")
@@ -367,6 +386,7 @@ class MultiAgentHarness:
             raise ValueError("multi-agent checkpoint identity mismatch")
         if state is None:
             state = MultiAgentRunState(actual_run_id, task.task_id, status=RunStatus.RUNNING)
+            state.reviewer_strategy = reviewer_strategy.value
             baseline = capture_text_snapshot(task.workspace, include_paths=task.allowed_paths)
             self._save_baseline(run_dir, baseline)
             checkpoint.save(state)
@@ -428,12 +448,18 @@ class MultiAgentHarness:
                     state.executor_run_id = f"{actual_run_id}_executor_{state.cycle}"
                     checkpoint.save(state)
                     effective_task = task
+                    execution_context: list[str] = []
+                    if state.plan:
+                        execution_context.append(f"Read-only planner plan:\n{state.plan}")
                     if state.review_feedback:
+                        execution_context.append(
+                            f"Read-only reviewer feedback:\n{state.review_feedback}"
+                        )
+                    if execution_context:
                         effective_task = replace(
                             task,
                             problem_statement=(
-                                f"{task.problem_statement}\n\n"
-                                f"Read-only reviewer feedback:\n{state.review_feedback}"
+                                f"{task.problem_statement}\n\n" + "\n\n".join(execution_context)
                             ),
                         )
                     executor_state = await self._run_executor(
@@ -463,12 +489,36 @@ class MultiAgentHarness:
                         checkpoint.save(state)
                         return state
                     # AgentRuntime only reaches COMPLETED after its deterministic verifier passes.
+                    current = capture_text_snapshot(
+                        task.workspace, include_paths=task.allowed_paths
+                    )
+                    diff = self._snapshot_diff(baseline, current)
+                    signals = self._risk_signals(executor_state, diff=diff)
+                    review_decision = reviewer_decision(reviewer_strategy, signals)
+                    state.reviewer_strategy = reviewer_strategy.value
+                    state.reviewer_required = review_decision.required
+                    state.reviewer_reasons = list(review_decision.reasons)
+                    if not review_decision.required:
+                        self._record(
+                            state,
+                            checkpoint,
+                            "verifier",
+                            "finish",
+                            "deterministic verification passed; reviewer skipped",
+                        )
+                        state.current_node = "finish"
+                        state.status = RunStatus.COMPLETED
+                        checkpoint.save(state)
+                        return state
                     self._record(
                         state,
                         checkpoint,
                         "verifier",
                         "reviewer",
-                        "deterministic verification passed",
+                        (
+                            "deterministic verification passed; reviewer reasons="
+                            + ",".join(review_decision.reasons)
+                        ),
                     )
                     state.current_node = "reviewer"
                     checkpoint.save(state)
@@ -491,6 +541,7 @@ class MultiAgentHarness:
                     ),
                     timeout_seconds=node_timeout,
                 )
+                state.reviewer_calls += 1
                 verdict, feedback = self._parse_review(review)
                 state.review_feedback = feedback
                 if verdict == "pass":
@@ -628,6 +679,48 @@ class MultiAgentHarness:
         if verdict not in {"pass", "replan"}:
             raise ValueError("reviewer verdict must be pass or replan")
         return verdict, str(parsed.get("feedback", "")).strip()
+
+    @staticmethod
+    def _risk_signals(executor_state: AgentState, *, diff: str) -> RiskSignals:
+        """Derive R2 gate inputs only from recorded runtime evidence and diff."""
+
+        changed_paths = set(re.findall(r"^\+\+\+ b/(.+)$", diff, flags=re.MULTILINE)) | set(
+            re.findall(r"^--- a/(.+)$", diff, flags=re.MULTILINE)
+        )
+        high_risk = any(
+            path.startswith((".github/", "deploy/", "deployment/"))
+            or PurePath(path).name.casefold()
+            in {"dockerfile", "pyproject.toml", "requirements.txt"}
+            for path in changed_paths
+        )
+        dependency_changed = any(
+            PurePath(path).name.casefold()
+            in {
+                "pyproject.toml",
+                "requirements.txt",
+                "poetry.lock",
+                "package.json",
+                "package-lock.json",
+            }
+            for path in changed_paths
+        )
+        static_antipattern = bool(
+            re.search(r"(?im)^\+.*\b(?:eval|exec|pickle\.loads|shell=True)\b", diff)
+        )
+        failed_tests = any(
+            message.role == "tool"
+            and message.name in {"run_tests", "verifier"}
+            and '"ok": false' in message.content.casefold()
+            for message in executor_state.messages
+        )
+        return RiskSignals(
+            tests_failed=failed_tests,
+            high_risk_path_changed=high_risk,
+            diff_bytes=len(diff.encode("utf-8")),
+            dependency_changed=dependency_changed,
+            static_antipattern_found=static_antipattern,
+            key_evidence_missing=not bool(executor_state.messages),
+        )
 
     @staticmethod
     def _snapshot_diff(before: dict[str, str], after: dict[str, str]) -> str:

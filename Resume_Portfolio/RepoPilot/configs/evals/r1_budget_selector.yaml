@@ -1,0 +1,7 @@
+schema_version: 1
+experiment: R1-D
+variant: adaptive_code_hybrid
+inherits: r1_expanded_hybrid.yaml
+retrieval:
+  budget_selector: deduplicated_diverse_fixed_character_token_estimator_v1
+  context_token_budget: 4096

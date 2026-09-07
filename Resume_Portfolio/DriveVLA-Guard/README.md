@@ -1,5 +1,10 @@
 # DriveVLA-Guard
 
+实验 PC 的自动安装与顺序运行入口为 `scripts/setup_experiment_pc.sh` 和
+`scripts/run_experiment_pc.sh`；通常由作品集根目录的统一编排器调用。正式档会固定下载
+AutoVLA、Qwen2.5-VL-3B 与公开 NAVSIM/OpenScene 资产，并在数据条款门槛通过后依次执行
+B0/E2/E3/E4。
+
 DriveVLA-Guard 是一个面向中国车企 VLM/VLA 算法岗位的短周期作品集项目。项目以
 [AutoVLA](https://github.com/ucla-mobility/AutoVLA) 的官方预训练权重为模型基线，
 以 [NAVSIM](https://github.com/autonomousvision/navsim) 为主要评测协议，研究无需重新训练基础模型的

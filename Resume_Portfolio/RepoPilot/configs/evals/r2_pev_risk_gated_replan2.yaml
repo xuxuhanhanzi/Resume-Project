@@ -1,0 +1,10 @@
+schema_version: 1
+experiment: R2-C
+variant: pev_risk_gated_reviewer_replan_2
+inherits: r2_pev_risk_gated.yaml
+control:
+  mode: plan_execute_verify_v1
+  reviewer: deterministic_risk_gated
+  max_replans: 2
+  signals:
+    [tests_failed, high_risk_path_changed, large_diff, dependency_changed, static_antipattern, low_confidence, evidence_missing]

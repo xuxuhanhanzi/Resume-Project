@@ -22,7 +22,7 @@ def evaluate_task_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     parse_errors = Counter[str]()
     for row in rows:
         response = str(row["response"])
-        reference = str(row["labels"])
+        reference, _ = extract_answer(str(row["labels"]))
         answer, parse_error = extract_answer(response)
         correct = answer_reward(answer, reference) == 1.0
         question_type = str(row.get("question_type", "unknown") or "unknown")

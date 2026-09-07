@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="${FORGEMM_ROOT:-/root/autodl-tmp/ForgeMM}"
-PYTHON_ENV="${FORGEMM_ENV:-/root/autodl-tmp/envs/forgemm}"
-MODEL="${FORGEMM_MODEL:-/root/autodl-tmp/models/Qwen2.5-VL-3B-Instruct}"
-RUNS="${ROOT}/artifacts/runs/cloud_stage04"
+ROOT="${FORGEMM_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+PYTHON_ENV="${FORGEMM_ENV:-${HOME}/.venvs/forgemm}"
+MODEL="${FORGEMM_MODEL:-${HOME}/resume-project-assets/forgemm/models/Qwen2.5-VL-3B-Instruct}"
+RUNS="${FORGEMM_RUN_DIR:-${ROOT}/artifacts/runs/cloud_stage04}"
 VAL_DATASET="${RUNS}/data/chartqa_val_strict_eval.jsonl"
 TEST_DATASET="${RUNS}/data/chartqa_test_strict_eval.jsonl"
+MODE="${1:-full}"
+
+case "${MODE}" in
+  val|full) ;;
+  *)
+    echo "usage: $0 {val|full}" >&2
+    exit 2
+    ;;
+esac
 
 source "${PYTHON_ENV}/bin/activate"
 export PYTHONPATH="${ROOT}/src"
@@ -19,6 +28,7 @@ run_eval() {
   local name="$2"
   local dataset="$3"
   local adapter="$4"
+  local evaluator="$5"
   local samples
   samples="$(wc -l < "${dataset}")"
   local result="${RUNS}/frozen_${split}_${name}.jsonl"
@@ -38,7 +48,7 @@ run_eval() {
   fi
 
   set +e
-  python "${PYTHON_ENV}/lib/python3.12/site-packages/swift/cli/infer.py" \
+  swift infer \
     --model "${MODEL}" \
     "${adapter_args[@]}" \
     --infer_backend transformers \
@@ -57,7 +67,7 @@ run_eval() {
   local code=$?
   echo "${code}" > "${infer_exit}"
   if [[ "${code}" -eq 0 ]]; then
-    python scripts/evaluate_infer_results.py --input "${result}" --output "${metrics}" \
+    python "scripts/${evaluator}" --input "${result}" --output "${metrics}" \
       > "${RUNS}/frozen_${split}_${name}.metrics.log" 2>&1
     code=$?
   fi
@@ -66,10 +76,16 @@ run_eval() {
   return "${code}"
 }
 
-run_eval val e0_base "${VAL_DATASET}" NONE
-run_eval val e1_answer "${VAL_DATASET}" "${RUNS}/e1_answer_sft_1000/checkpoint-1000"
+run_eval val e0_base "${VAL_DATASET}" NONE evaluate_task_infer_results.py
+run_eval val e1_answer "${VAL_DATASET}" "${RUNS}/e1_answer_sft_1000/checkpoint-1000" \
+  evaluate_task_infer_results.py
+run_eval val e2_structured "${VAL_DATASET}" "${RUNS}/e2_structured_sft_1000/checkpoint-1000" \
+  evaluate_infer_results.py
 
-run_eval test_strict e0_base "${TEST_DATASET}" NONE
-run_eval test_strict e1_answer "${TEST_DATASET}" "${RUNS}/e1_answer_sft_1000/checkpoint-1000"
-run_eval test_strict e2_structured "${TEST_DATASET}" \
-  "${RUNS}/e2_structured_sft_1000/checkpoint-1000"
+if [[ "${MODE}" == "full" ]]; then
+  run_eval test_strict e0_base "${TEST_DATASET}" NONE evaluate_task_infer_results.py
+  run_eval test_strict e1_answer "${TEST_DATASET}" "${RUNS}/e1_answer_sft_1000/checkpoint-1000" \
+    evaluate_task_infer_results.py
+  run_eval test_strict e2_structured "${TEST_DATASET}" \
+    "${RUNS}/e2_structured_sft_1000/checkpoint-1000" evaluate_infer_results.py
+fi

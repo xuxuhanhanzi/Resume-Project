@@ -71,7 +71,17 @@ async def _run(arguments: argparse.Namespace) -> dict[str, object]:
         for task_id in selected:
             record = next(item for item in public if item["instance_id"] == task_id)
             task_config = config[task_id]
-            workspace = (workspace_root / task_id).resolve(strict=True)
+            base_workspace = (workspace_root / task_id).resolve(strict=True)
+            workspace = workspace_root / "runs" / arguments.run_id / task_id
+            if workspace.exists():
+                raise FileExistsError(f"dedicated run workspace already exists: {workspace}")
+            workspace.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run(
+                ["git", "clone", "--local", "--no-hardlinks", str(base_workspace), str(workspace)],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
             base_commit = str(record["base_commit"])
             allowed_paths = tuple(str(item) for item in task_config["allowed_paths"])
             if _git(workspace, "rev-parse", "HEAD") != base_commit:
@@ -146,9 +156,7 @@ async def _run(arguments: argparse.Namespace) -> dict[str, object]:
                     "image": image,
                 }
             )
-            # restore workspace to base_commit so the next task starts clean
-            _git(workspace, "checkout", "--", *allowed_paths)
-            _git(workspace, "clean", "-fd", "--", *allowed_paths)
+            # Keep the dedicated workspace unchanged as generation evidence.
     except Exception as exc:  # noqa: BLE001 - record top-level error, still emit predictions
         run_error = f"{type(exc).__name__}: {exc}"
     finally:
@@ -165,6 +173,7 @@ async def _run(arguments: argparse.Namespace) -> dict[str, object]:
             "submission_model_name": submission_model_name,
             "model_revision": arguments.model_revision,
             "tasks": len(results),
+            "expected_tasks": len(selected),
             "run_error": run_error,
             "results": results,
             "predictions_path": str(predictions_path),
@@ -194,7 +203,9 @@ def main() -> int:
     arguments = parser.parse_args()
     summary = asyncio.run(_run(arguments))
     print(json.dumps({key: value for key, value in summary.items() if key != "results"}))
-    return 0
+    return (
+        0 if summary["run_error"] is None and summary["tasks"] == summary["expected_tasks"] else 1
+    )
 
 
 if __name__ == "__main__":

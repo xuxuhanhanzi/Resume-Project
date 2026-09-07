@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "stages": [
+    {
+      "id": "host-preflight",
+      "project": "suite",
+      "phase": "setup",
+      "profiles": ["smoke", "full"],
+      "cwd": ".",
+      "command": ["python3", "scripts/preflight_experiment_pc.py", "--profile", "{profile}"]
+    },
+    {
+      "id": "drivevla-setup",
+      "project": "DriveVLA-Guard",
+      "phase": "setup",
+      "profiles": ["smoke", "full"],
+      "cwd": "DriveVLA-Guard",
+      "command": ["bash", "scripts/setup_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "forgemm-setup",
+      "project": "ForgeMM",
+      "phase": "setup",
+      "profiles": ["smoke", "full"],
+      "cwd": "ForgeMM",
+      "command": ["bash", "scripts/setup_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "hospital-setup",
+      "project": "Hospital_Workforce_Platform",
+      "phase": "setup",
+      "profiles": ["smoke", "full"],
+      "cwd": "Hospital_Workforce_Platform",
+      "command": ["bash", "scripts/setup_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "repopilot-setup",
+      "project": "RepoPilot",
+      "phase": "setup",
+      "profiles": ["smoke", "full"],
+      "cwd": "RepoPilot",
+      "command": ["bash", "scripts/setup_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "drivevla-experiments",
+      "project": "DriveVLA-Guard",
+      "phase": "run",
+      "profiles": ["smoke", "full"],
+      "cwd": "DriveVLA-Guard",
+      "command": ["bash", "scripts/run_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "forgemm-experiments",
+      "project": "ForgeMM",
+      "phase": "run",
+      "profiles": ["smoke", "full"],
+      "cwd": "ForgeMM",
+      "command": ["bash", "scripts/run_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "hospital-experiments",
+      "project": "Hospital_Workforce_Platform",
+      "phase": "run",
+      "profiles": ["smoke", "full"],
+      "cwd": "Hospital_Workforce_Platform",
+      "command": ["bash", "scripts/run_experiment_pc.sh", "{profile}"]
+    },
+    {
+      "id": "repopilot-experiments",
+      "project": "RepoPilot",
+      "phase": "run",
+      "profiles": ["smoke", "full"],
+      "cwd": "RepoPilot",
+      "command": ["bash", "scripts/run_experiment_pc.sh", "{profile}"]
+    }
+  ]
+}

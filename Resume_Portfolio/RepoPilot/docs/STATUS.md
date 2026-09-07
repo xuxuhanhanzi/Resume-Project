@@ -2,7 +2,7 @@
 
 > This file is the canonical description of the project's current state. Where it
 > conflicts with any other doc (README, project_context_summary, agent card, old
-> summaries), this file wins. Last updated: 2026-08-14.
+> summaries), this file wins. Last updated: 2026-08-23.
 
 ## What RepoPilot is
 
@@ -28,17 +28,89 @@ and a release/tag remain open.
 | P11 | Multi-agent harness | ✅ graph + routing + authenticated HTTP/SSE + Runtime/Verifier load + real Qwen 1/4/8 capacity |
 | P12 | Evaluation protocol & delivery | ✅ evidence, clean-clone record and local release/tag delivered |
 
-## Quality gates (verified 2026-08-14)
+## CLI follow-up P5–P20 (v1.12.0)
+
+| Follow-up | Scope | Status |
+|---|---|---|
+| P5 | Non-destructive Windows project-local bootstrap | ✅ `scripts/setup_windows.ps1` |
+| P6 | Separate coding development-funnel measurement | ✅ offline protocol + CLI; no score claimed |
+| P7 | Fresh-read guard after recoverable patch conflict | ✅ bounded runtime correction |
+| P8 | Session health visibility | ✅ `/status` includes plan, verification, tasks and MCP facts |
+| P9 | Explicit local supervised argv jobs | ✅ no automatic replay after restart |
+| P10 | MCP per-server tool policy and named capability probe | ✅ stdio/loopback only, high-risk tool policy retained |
+| P11 | Windows start, install and interruption acceptance | ✅ non-destructive setup validation; no cloud call |
+| P12 | Reproducible synthetic coding development suite | ✅ explicit cloud-consent runner; no capability score claimed |
+| P13 | Evidence-driven repair and approval visibility | ✅ local `/evidence`; verification logs not auto-forwarded to a model |
+| P14 | Supervisor quotas, labels and failure diagnosis | ✅ queue cap, timeout, failure receipt and offline `show` |
+| P15 | MCP health/audit and policy hardening | ✅ explicit probe receipt, offline history and capability drift |
+| P16 | Comparable synthetic coding-development baseline receipt | ✅ explicit cloud runner writes a redacted receipt; no cloud run was started automatically |
+| P17 | Evidence-gated coding-agent improvements | ✅ offline report maps observed funnel failures to bounded follow-up work; no improvement is claimed before a comparable baseline |
+| P18 | Windows launcher collision recovery | ✅ shell-doctor plus isolated session-only launcher acceptance; no PATH/Profile mutation |
+| P19 | Claude-style local workflow visibility | ✅ `/workflow` summarizes plan, changes, verification and governed repair readiness |
+| P20 | Windows release hardening | ✅ project-local offline release gate for fixture, launcher, dependency and quality checks |
+| P21 | DeepSeek synthetic development baseline | ✅ public four-fixture diagnostic: 3/4 verified; one post-test optional-tool token-budget stop |
+| P22 | Evidence-driven repair | ✅ trusted-fixture-only auto-finalization after exact patch + immutable test pass; normal sessions unchanged |
+| P23 | Comparable DeepSeek re-run | ✅ same suite/provider/model/cases: 4/4 verified after P22; diagnostic evidence only |
+| P24 | Qwen comparison | ⏸ deferred: no Qwen credential/configuration or provider call was authorized in this phase |
+| P25 | Windows global-environment remediation | ⏸ intentionally not automated: Anaconda PATH collision and stale pip metadata remain detectable via `shell-doctor`/`doctor` |
+| P26 | Real-project cloud acceptance | ⏸ requires separate consent to transmit selected repository file content to DeepSeek; local scripted/integration coverage remains green |
+| P27 | Release handoff | ✅ v1.13.0 notes, reproducible diagnostic receipts and quality-gate procedure prepared; no remote publish/tag created |
+| P28 | Offline comparable-run report | ✅ `eval coding-dev compare` reports per-case/funnel changes and labels incomplete control as `directional_only` |
+| P29 | Receipt input hardening | ✅ bounded strict receipt/profile schema and receipt/outcome alignment; unknown fields are rejected |
+| P30 | Regression/release gate refresh | ✅ v1.14.0 docs, compare/receipt tests and project-local verification refreshed; no provider call required |
+| P31 | Outcome artifact integrity | ✅ new receipts bind the redacted JSONL SHA-256; report/compare reject a mismatched binding |
+| P32 | Reproducibility snapshot | ✅ receipt records runtime version, budget, tool surface and immutable fixture verification command; offline `verify-receipt` classifies legacy data honestly |
+| P33 | Cancellation recovery clarity | ✅ durable cancellation tests remain green; interactive output now states that the checkpoint is saved and can be continued |
+| P34 | DeepSeek-first interaction | ✅ welcome and `/model` guidance prioritize configured DeepSeek profiles; Qwen remains unconfigured and untested |
+| P35 | Change/verification evidence | ✅ existing local workflow/evidence/turn snapshot summary remains the only automatic post-turn summary; raw logs are not forwarded to a provider |
+| P36 | Windows maintenance diagnostics | ✅ `shell-doctor` supports JSONL and uses the active venv launcher even for `python -m repopilot`; no global mutation |
+| P37 | Bounded real-project cloud acceptance | ✅ initial two attempts were inconclusive; P40 later completed a separately authorized no-tool, read-only retry over SSE for the same three files. Intent and final receipts verify locally. |
+| P38 | Content-free DeepSeek streaming diagnosis | ✅ `auth probe deepseek` sends only a fixed public marker and records safe SSE diagnostics; the live probe returned HTTP 200, `stop`, seven visible deltas and the expected marker. |
+| P39 | Acceptance audit and offline verification | ✅ preflight intent + final receipts cover completion, empty output and transport failure; `acceptance show|verify` never reads source files or contacts a provider. |
+| P40 | Reproducible read-only acceptance | ✅ DeepSeek receipt `p40_streaming_readonly` verified after a three-file only, no-tool, no-edit retry; external findings remain advisory pending local engineering review. |
+| P41 | Claude-style interaction visibility | ✅ `/status`, `/workflow` and `/trace` state model, stream and approval facts; `doctor --fix-plan` is advisory only. |
+| P42 | Windows project launcher | ✅ `scripts/repopilot.ps1` pins startup to the project `.venv` without modifying PATH or `$PROFILE`; isolated launcher checks cover it. |
+| P43 | Provider/receipt regression gates | ✅ empty-stream, receipt integrity/tamper, cancellation, launcher and offline release coverage are in the local gate; Qwen remains unconfigured and uncalled. |
+| P44 | P40 advisory evidence triage | ✅ documented local confirmation/rejection matrix; no external response was accepted as proof or an automatic code change. |
+| P45 | Cancellation and process lifetime | ✅ cancellation wins concurrent completion; cross-thread cancellation wakes the owning loop; POSIX owns/kills its process group. |
+| P46 | Docker workspace boundary | ✅ workspace bind mount is explicitly read-only; live safety probe expects a workspace write to fail. |
+| P47 | Output encoding boundary | ✅ bounded output backs up to a UTF-8 code-point boundary. |
+| P48 | Provider failure recovery | ✅ empty visible final responses produce classified, content-free recovery guidance. |
+| P49 | Session recovery E2E | ✅ cancellation checkpoint can be continued in a later turn; compaction/resume coverage remains in integration tests. |
+| P50 | Windows recovery guidance | ✅ manual non-destructive launcher/PATH recovery guide; no global mutation automated. |
+| P51 | Clean-install packaging smoke | ✅ explicit wheelhouse + clean-venv smoke script, retained evidence, and opt-in release-gate integration. |
+| P52 | Non-destructive release baseline | ✅ `release_baseline_windows.ps1` writes retained Git-state/diff-check evidence without staging, committing, resetting, deleting or repairing. |
+| P53 | Docker live security gate | ✅ Docker Desktop was restored; the pinned sandbox image rebuilt and the local live boundary test passed without host fallback. |
+| P54 | Cross-runtime interruption recovery | ✅ integration coverage cancels an active tool turn, closes the runtime, reloads the checkpoint and continues in a fresh runtime. |
+| P55 | DeepSeek stream integrity | ✅ DeepSeek requires its terminal SSE marker after stream chunks and classifies a missing marker as recoverable; generic local compatibility remains permissive. |
+| P56 | Claude-style change visibility | ✅ local `/changes` summarizes the latest durable revision and directs users to guarded `/diff` and `/rewind`. |
+| P57 | Safe edit/revision recovery | ✅ edit preview, explicit approval, conflict-aware undo/rewind and manual-deletion refusal remain regression-covered. |
+| P58 | Bounded real-project DeepSeek acceptance | ✅ three named provider files reviewed in no-tool/no-edit mode; first semantically invalid redaction result rejected, corrected source-redaction re-run classified locally. |
+| P59 | Cross-platform CI | ✅ workflow adds Windows 3.12 project-local acceptance beside Ubuntu quality and Docker jobs; remote execution awaits a human-selected commit/push. |
+| P60 | Release-readiness handoff | ✅ documented optional baseline/package/Docker gates and v1.18 release-readiness record; Qwen remains unconfigured and uncalled. |
+| P61 | Release-scope inventory | ✅ retained non-destructive scope manifest classifies current Git entries for human-reviewed staging; it never selects, stages or commits user changes. |
+| P62 | Docker/CI release preflight | ⚠️ local Docker live gate now passes and CI workflow parses; remote CI remains blocked until a maintainer configures `origin` and pushes a reviewed commit. |
+| P63 | Controlled DeepSeek interaction acceptance | ✅ fixed no-tool marker returned over DeepSeek streaming; deterministic cancellation, recovery, revision, undo and permission tests passed. |
+| P64 | Offline interactive transcript | ✅ local `/status`/`/workflow`/`/changes`/`/context` transcript acceptance writes retained evidence without a model call. |
+| P65 | Package identity receipt | ✅ clean wheel smoke records SHA-256 and a separate offline verifier checks the retained wheel. |
+| P66 | Reliability dashboard and holdout boundary | ✅ local dashboard aggregates receipt integrity/categories without a score; metadata-only five-task official-evaluator holdout contract is packaged separately. |
+
+These follow-ups do not change the frozen FRAMES, DABench, or SWE-bench-Live
+metrics below. In particular, P6/P12 are diagnostic infrastructure, not a reported
+coding-agent score.
+
+## Quality gates (verified 2026-08-23)
 
 Run with the project venv (`.venv`, Python 3.12.3):
 
 | Gate | Command | Result |
 |------|---------|--------|
-| Format | `ruff format --check .` | ✅ 141 files formatted |
+| Format | `ruff format --check .` | ⚠️ 13 legacy files would be reformatted; P0–P15 changed code is formatted |
 | Lint | `ruff check .` | ✅ all checks passed |
-| Type | `mypy` (strict, src+tests+scripts) | ✅ 113 source files, 0 errors |
-| Test | `pytest -q` | ✅ 90 passed, 1 live-Docker test skipped by default |
-| Live safety | `REPOPILOT_RUN_DOCKER_SECURITY=1 ... dev.py safety` | ✅ 6 passed |
+| Type | `mypy` (strict, src+tests+scripts) | ✅ 195 source files, 0 errors (existing unused-override warning only) |
+| Test | `pytest -q -p no:cacheprovider` | ✅ 278 passed, 1 live-Docker test skipped by default |
+| Live safety | `scripts\\docker_security_gate_windows.ps1 -BuildImage` | ✅ pinned sandbox rebuilt; live container boundary test passed (1 passed) |
+| Package smoke | scripts\\package_smoke_windows.ps1 | ✅ clean venv wheelhouse install, launcher, doctor and SHA-256 receipt verification (artifacts retained) |
 
 `python scripts/dev.py check` completed successfully in the current workspace;
 the executable harness, routing, service and HTTP/SSE tests pass. The Docker test is isolated in a

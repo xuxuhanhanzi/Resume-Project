@@ -36,7 +36,8 @@ export PYTHONPATH="${DRIVEVLA_GUARD_ROOT}/src:${AUTOVLA_ROOT}:${AUTOVLA_ROOT}/na
 export NAVSIM_DEVKIT_ROOT="${AUTOVLA_ROOT}/navsim"
 
 AGENT_CONFIG_DIR="${AUTOVLA_ROOT}/navsim/navsim/planning/script/config/common/agent"
-cp "${DRIVEVLA_GUARD_ROOT}/configs/navsim_drivevla_guard_agent.yaml" "${AGENT_CONFIG_DIR}/drivevla_guard_agent.yaml"
+install -m 0644 "${DRIVEVLA_GUARD_ROOT}/configs/navsim_drivevla_guard_agent.yaml" \
+  "${AGENT_CONFIG_DIR}/drivevla_guard_agent.yaml"
 
 cd "${AUTOVLA_ROOT}"
 python "${NAVSIM_DEVKIT_ROOT}/navsim/planning/script/run_pdm_score_cot.py" \

@@ -43,5 +43,5 @@ strict = true
 files = ["src", "tests", "scripts"]
 
 [[tool.mypy.overrides]]
-module = ["pyarrow", "pyarrow.*"]
+module = ["huggingface_hub", "torch", "torch.*", "pyarrow", "pyarrow.*"]
 ignore_missing_imports = true

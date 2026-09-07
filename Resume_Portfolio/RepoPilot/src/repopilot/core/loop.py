@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 from uuid import uuid4
@@ -21,6 +20,8 @@ from repopilot.core.contracts import (
     ToolCall,
     ToolResult,
 )
+from repopilot.core.events import RuntimeEvent, RuntimeEventKind
+from repopilot.core.kernel import AgentKernel, AgentRuntimeConfig
 from repopilot.memory.store import Episode, EpisodicMemoryStore, SessionMemory
 from repopilot.observability.trace import TraceRecorder
 from repopilot.orchestration.parallel import execute_parallel_read_only
@@ -33,20 +34,8 @@ from repopilot.skills.registry import SkillRegistry
 from repopilot.task import PublicTaskSpec
 from repopilot.tools.base import Tool, ToolContext, ToolRegistry
 from repopilot.tools.coding import capture_text_snapshot
+from repopilot.tools.contracts import StageScopedToolContracts
 from repopilot.verification.verifier import DeterministicVerifier
-
-
-@dataclass(frozen=True, slots=True)
-class AgentRuntimeConfig:
-    """Small runtime knobs kept stable during evaluation."""
-
-    model_retries: int = 2
-    tool_retries: int = 1
-    parallel_read_tools: bool = True
-
-    def __post_init__(self) -> None:
-        if self.model_retries < 0 or self.tool_retries < 0:
-            raise ValueError("retry counts must be non-negative")
 
 
 class AgentRuntime:
@@ -66,6 +55,7 @@ class AgentRuntime:
         episodic_memory: EpisodicMemoryStore | None = None,
         planner: SimplePlanner | None = None,
         config: AgentRuntimeConfig | None = None,
+        tool_contracts: StageScopedToolContracts | None = None,
     ) -> None:
         self.provider = provider
         self.registry = ToolRegistry(tools)
@@ -78,6 +68,15 @@ class AgentRuntime:
         self.episodic_memory = episodic_memory
         self.planner = planner or SimplePlanner()
         self.config = config or AgentRuntimeConfig()
+        self.tool_contracts = tool_contracts
+        self.kernel = AgentKernel(
+            provider=self.provider,
+            registry=self.registry,
+            policy=self.policy,
+            approval=self.approval,
+            config=self.config,
+            tool_contracts=self.tool_contracts,
+        )
 
     async def run(
         self, task: PublicTaskSpec, *, run_id: str | None = None, resume: bool = True
@@ -125,14 +124,23 @@ class AgentRuntime:
         last_changed: list[str] | None = None
         consecutive_no_change = 0
 
+        def emit(event: RuntimeEvent) -> None:
+            self._record_kernel_event(trace, event)
+
         while state.status is RunStatus.RUNNING:
             reason = guard.exceeded_reason(state)
             if reason is not None:
                 self._fail(state, reason, trace, checkpoint)
                 break
             if state.pending_calls:
-                results = await self._execute_calls(
-                    tuple(state.pending_calls), task, context, state, journal, trace, checkpoint
+                results = await self.kernel.execute_calls(
+                    tuple(state.pending_calls),
+                    task=task,
+                    context=context,
+                    state=state,
+                    journal=journal,
+                    persist=lambda: checkpoint.save(state),
+                    emit=emit,
                 )
                 state.pending_calls.clear()
                 for result in results:
@@ -150,6 +158,33 @@ class AgentRuntime:
                             f"{result.tool_name} failed with {result.error_type}: {result.error}"
                         )
                 checkpoint.save(state)
+                if self._can_finalize_after_successful_test(task, context, results):
+                    verification = await verifier.verify(task)
+                    trace.record(
+                        "verification_finished",
+                        {
+                            "passed": verification.passed,
+                            "summary": verification.summary,
+                            "details": verification.details,
+                        },
+                    )
+                    if verification.passed:
+                        state.final_answer = (
+                            "Applied the requested patch and verified the immutable visible tests."
+                        )
+                        state.messages.append(Message("assistant", state.final_answer))
+                        state.status = RunStatus.COMPLETED
+                        checkpoint.save(state)
+                        if self.episodic_memory is not None:
+                            self.episodic_memory.append(
+                                Episode(
+                                    task.task_id,
+                                    task.problem_statement,
+                                    "; ".join(state.plan),
+                                    "completed",
+                                )
+                            )
+                        break
                 continue
 
             state.iteration += 1
@@ -161,36 +196,30 @@ class AgentRuntime:
             request = self.context_builder.build(
                 task=task,
                 state=state,
-                tools=self.registry.specs(),
+                tools=(
+                    self.tool_contracts.visible_specs(state.workflow_stage)
+                    if self.tool_contracts is not None
+                    else self.registry.specs()
+                ),
                 session_memory=session_memory,
                 episodes=episodes,
                 skills=selected_skills,
             )
-            trace.record(
-                "model_call_started",
-                {"iteration": state.iteration, "message_count": len(request.messages)},
-            )
             try:
-                response = await self._call_model(request)
+                response = await self.kernel.request_model(
+                    request, iteration=state.iteration, emit=emit
+                )
             except ModelProviderError as error:
                 self._fail(state, f"model provider failed: {error}", trace, checkpoint)
                 break
             state.input_tokens += response.usage.input_tokens
             state.output_tokens += response.usage.output_tokens
-            trace.record(
-                "model_call_finished",
-                {
-                    "model": response.model,
-                    "input_tokens": response.usage.input_tokens,
-                    "output_tokens": response.usage.output_tokens,
-                    "tool_calls": len(response.tool_calls),
-                },
-            )
             if response.tool_calls:
                 state.messages.append(
                     Message(
                         "assistant",
                         "Requested tools: " + ", ".join(call.name for call in response.tool_calls),
+                        tool_calls=response.tool_calls,
                     )
                 )
                 state.pending_calls = list(response.tool_calls)
@@ -262,6 +291,43 @@ class AgentRuntime:
             },
         )
         return state
+
+    def _can_finalize_after_successful_test(
+        self,
+        task: PublicTaskSpec,
+        context: ToolContext,
+        results: tuple[ToolResult, ...],
+    ) -> bool:
+        """Allow the synthetic diagnostic runner to avoid an unneeded model turn.
+
+        This is intentionally disabled by default for normal coding sessions.
+        It applies only to trusted public fixtures after one successful exact
+        patch and the fixture's immutable test command have both succeeded.
+        """
+
+        if not self.config.auto_finalize_after_successful_test or not task.trusted_fixture:
+            return False
+        tests_passed = any(result.tool_name == "run_tests" and result.ok for result in results)
+        patch_applied = any(
+            result.tool_name == "apply_patch" and result.ok for result in context.recent_results
+        )
+        return tests_passed and patch_applied
+
+    @staticmethod
+    def _record_kernel_event(trace: TraceRecorder, event: RuntimeEvent) -> None:
+        """Preserve the v1 trace names while recording the richer kernel stream."""
+
+        if event.kind is RuntimeEventKind.MODEL_CALL_COMPLETED:
+            trace.record("model_call_finished", event.data)
+        elif event.kind is RuntimeEventKind.TOOL_CALL_COMPLETED and bool(event.data.get("cached")):
+            trace.record(
+                "tool_result_replayed",
+                {"call_id": event.data["call_id"], "tool": event.data["tool"]},
+            )
+        elif event.kind is RuntimeEventKind.TOOL_CALL_COMPLETED:
+            trace.record("tool_call_finished", event.data)
+        else:
+            trace.record(event.kind.value, event.data)
 
     async def _call_model(self, request: object) -> ModelResponse:
         from repopilot.core.contracts import ModelRequest

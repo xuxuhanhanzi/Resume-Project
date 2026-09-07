@@ -1,0 +1,10 @@
+schema_version: 1
+experiment: R1-B
+variant: routed_hybrid_rrf
+inherits: r1_hybrid.yaml
+retrieval:
+  query_routing: deterministic_trace_path_identifier_v1
+  lexical_weight_precise_query: 2
+  dense_weight_precise_query: 1
+  lexical_weight_natural_language: 1
+  dense_weight_natural_language: 1

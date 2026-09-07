@@ -1,0 +1,9 @@
+schema_version: 1
+experiment: R3-B1
+variant: typed_flat_tool_surface
+inherits: r3_b0.yaml
+contract:
+  schema_validation: json_schema_subset_v1
+  path_scope: declared_path_fields_v1
+  stage_allowlist: disabled
+  recovery_codes: structured_v1

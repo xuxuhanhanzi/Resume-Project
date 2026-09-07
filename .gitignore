@@ -39,6 +39,7 @@ Resume_Portfolio/cloud_packages/*.tar.gz
 **/checkpoints/
 **/wandb/
 **/mlruns/
+Resume_Portfolio/artifacts/experiment-suite/
 
 # Reproducible third-party benchmark checkouts and corpora
 Resume_Portfolio/RepoPilot/external/

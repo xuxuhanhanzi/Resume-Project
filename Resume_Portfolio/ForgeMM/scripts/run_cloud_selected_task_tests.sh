@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="${FORGEMM_ROOT:-/root/autodl-tmp/ForgeMM}"
-PYTHON_ENV="${FORGEMM_ENV:-/root/autodl-tmp/envs/forgemm}"
-MODEL="${FORGEMM_MODEL:-/root/autodl-tmp/models/Qwen2.5-VL-3B-Instruct}"
-RUNS="${ROOT}/artifacts/runs/cloud_stage04"
+ROOT="${FORGEMM_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+PYTHON_ENV="${FORGEMM_ENV:-${HOME}/.venvs/forgemm}"
+MODEL="${FORGEMM_MODEL:-${HOME}/resume-project-assets/forgemm/models/Qwen2.5-VL-3B-Instruct}"
+RUNS="${FORGEMM_RUN_DIR:-${ROOT}/artifacts/runs/cloud_stage04}"
 SUMMARY="${RUNS}/frozen_val_summary.json"
 
 source "${PYTHON_ENV}/bin/activate"
@@ -38,7 +38,7 @@ run_task_eval() {
     return 0
   fi
   set +e
-  python "${PYTHON_ENV}/lib/python3.12/site-packages/swift/cli/infer.py" \
+  swift infer \
     --model "${MODEL}" \
     --adapters "${adapter}" \
     --infer_backend transformers \

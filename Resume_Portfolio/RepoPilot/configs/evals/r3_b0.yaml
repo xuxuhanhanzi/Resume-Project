@@ -1,0 +1,11 @@
+schema_version: 1
+experiment: R3-B0
+variant: flat_loose_tool_surface
+dataset: BFCL_v4_offline
+subsets: [simple, parallel, multi_turn, relevance]
+contract:
+  schema_validation: disabled
+  stage_allowlist: disabled
+  recovery_codes: free_text
+report:
+  metrics: [ast_exact_accuracy, executable_call_accuracy, relevance_rejection, invalid_parameter_rate, invalid_path_rejection, recovery_success]

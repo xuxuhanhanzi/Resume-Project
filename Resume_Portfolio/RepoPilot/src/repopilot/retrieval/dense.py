@@ -1,4 +1,4 @@
-"""Dense retrieval via Ollama embedding endpoint (nomic-embed-text)."""
+"""Dense retrieval via Ollama's batch-compatible embedding endpoint."""
 
 from __future__ import annotations
 
@@ -24,23 +24,31 @@ class DenseRetriever:
         *,
         model: str = "nomic-embed-text",
         base_url: str = "http://127.0.0.1:11434",
+        document_embeddings: list[list[float]] | None = None,
     ) -> None:
         self.documents = documents
         self.model = model
         self.base_url = base_url.rstrip("/")
-        self._doc_embeddings: list[list[float]] = [self._embed(doc.text) for doc in documents]
+        if document_embeddings is not None and len(document_embeddings) != len(documents):
+            raise ValueError("document_embeddings must have one vector per document")
+        self._doc_embeddings = (
+            [list(vector) for vector in document_embeddings]
+            if document_embeddings is not None
+            else [self._embed(doc.text) for doc in documents]
+        )
         self._doc_norms = [self._norm(emb) for emb in self._doc_embeddings]
 
     def _embed(self, text: str) -> list[float]:
-        payload = json.dumps({"model": self.model, "prompt": text[:8000]}).encode("utf-8")
+        payload = json.dumps({"model": self.model, "input": text[:8000]}).encode("utf-8")
         req = urllib.request.Request(
-            f"{self.base_url}/api/embeddings",
+            f"{self.base_url}/api/embed",
             data=payload,
             headers={"Content-Type": "application/json"},
         )
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read())
-        emb = cast(list[float], data.get("embedding", []))
+        raw_embeddings = cast(list[list[float]], data.get("embeddings", []))
+        emb = raw_embeddings[0] if len(raw_embeddings) == 1 else []
         if not emb:
             raise RuntimeError(f"empty embedding from {self.model} for text len={len(text)}")
         return emb

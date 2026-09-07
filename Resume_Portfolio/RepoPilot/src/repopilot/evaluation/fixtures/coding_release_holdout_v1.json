@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "suite_id": "repopilot-swebench-live-release-holdout-v1",
+  "kind": "external_immutable_holdout",
+  "task_count": 5,
+  "visibility": "Task identities, gold patches, hidden tests and evaluator output are not included in this package.",
+  "selection": "Fresh SWE-bench-Live Lite Python tasks selected before evaluation with seed 7 and base commits pinned by the external harness.",
+  "evaluator": "The official evaluator applies gold test patches only after the agent ends, inside the pinned official image.",
+  "execution_requirements": [
+    "Docker daemon",
+    "frozen dataset revision and image digests",
+    "network denied inside the scored agent sandbox",
+    "artifact digest verification"
+  ],
+  "evidence_paths": [
+    "docs/STATUS.md",
+    "docs/evidence/artifact_index.json",
+    "scripts/prepare_swebench_fresh_holdout.py",
+    "scripts/run_swebench_live_fresh_holdout.py",
+    "scripts/eval_swebench_resolved.py"
+  ],
+  "release_rule": "Synthetic development receipts may diagnose regressions but never replace this independent official-evaluator holdout."
+}

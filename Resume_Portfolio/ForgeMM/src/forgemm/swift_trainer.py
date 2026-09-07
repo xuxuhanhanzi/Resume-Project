@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import torch  # type: ignore[import-not-found]
+import torch
 from swift.rlhf_trainers import GRPOTrainer  # type: ignore[import-not-found]
 from swift.trainers.trainer_factory import TrainerFactory  # type: ignore[import-not-found]
 

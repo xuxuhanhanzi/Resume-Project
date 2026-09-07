@@ -52,4 +52,32 @@ def test_skill_progressive_disclosure_and_context_trimming(tmp_path: Path) -> No
 
     assert registry.descriptors() == (("python-bugfix", "fix Python bugs"),)
     assert "Inspect, patch, verify" in request.messages[1].content
+    assert "Never claim that a file was inspected" in request.messages[0].content
     assert request.messages[-1].content.endswith("[context compressed]")
+
+
+def test_project_skill_overrides_same_named_user_skill(tmp_path: Path) -> None:
+    user_skill = tmp_path / "user" / "skills" / "review" / "SKILL.md"
+    project_skill = tmp_path / "project" / "skills" / "review" / "SKILL.md"
+    user_skill.parent.mkdir(parents=True)
+    project_skill.parent.mkdir(parents=True)
+    user_skill.write_text(
+        "---\nname: review\ndescription: user review\n---\nUser procedure.",
+        encoding="utf-8",
+    )
+    project_skill.write_text(
+        "---\nname: review\ndescription: project review\n---\nProject procedure.",
+        encoding="utf-8",
+    )
+
+    registry = SkillRegistry(
+        project_skill.parent.parent,
+        additional_roots=(user_skill.parent.parent,),
+    )
+    selected = registry.select("Please review this patch.")
+
+    review = registry.get("review")
+    assert review is not None
+    assert review.source == "project"
+    assert review.load_instructions() == "Project procedure."
+    assert selected[0].source == "project"

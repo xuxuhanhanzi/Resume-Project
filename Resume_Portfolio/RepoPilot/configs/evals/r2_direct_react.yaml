@@ -1,0 +1,22 @@
+schema_version: 1
+experiment: R2-A
+variant: direct_react
+dataset: SWE-bench_Verified
+split_protocol: repository_stratified_20_40_40_final_holdout
+fixed_controls:
+  model: qwen2.5_7b_local
+  model_revision: 845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e
+  temperature: 0.0
+  repetition_seeds: [7, 19, 43]
+  total_token_budget: 96000
+  token_budget_mode: pre_call_conservative_reservation_v1
+  token_reservation_framing_overhead: 512
+  max_iterations: 12
+  max_tool_calls: 20
+  max_wall_seconds: 600
+  repetitions: 3
+control:
+  mode: direct_react
+  reviewer: none
+report:
+  metrics: [resolved_rate, false_accept_rate, tool_calls, token_cost, p50_wall_seconds, p95_wall_seconds]

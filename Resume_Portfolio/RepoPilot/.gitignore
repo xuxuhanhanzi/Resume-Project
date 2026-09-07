@@ -19,6 +19,7 @@ logs/
 
 # External submodules and large data (not committed to root repo)
 external/
+Reference code/
 build/
 evaluation/benchmarks/workspaces/
 evaluation/benchmarks/corpora/
@@ -28,6 +29,8 @@ gold.repopilot-gold-*.json
 
 # Downloaded gold datasets for SWE-bench-Live / FRAMES / DABench prep
 evaluation/benchmarks/data/
+evaluation/memory/longmemeval/data/
+evaluation/memory/longmemeval/data/
 
 # Devcheck / one-off quality-gate scratch outputs (regenerable)
 dc_*.txt

@@ -1,7 +1,13 @@
 import json
 
 from forgemm.data.schemas import EvidenceCell, EvidenceRecord, Operation, OperationArgument
-from forgemm.data.training_builders import build_grpo_rows, build_sft_rows, render_structured_answer
+from forgemm.data.training_builders import (
+    build_answer_sft_rows,
+    build_grpo_rows,
+    build_sft_rows,
+    build_strict_eval_rows,
+    render_structured_answer,
+)
 from forgemm.reasoning.parser import parse_prediction
 
 
@@ -45,6 +51,18 @@ def test_grpo_builder_keeps_reward_columns_outside_messages() -> None:
     assert row["reference_answer"] == "5"
     assert len(json.loads(row["gold_evidence"])) == 2
     assert row["evidence_mask"] and row["operation_mask"]
+
+
+def test_answer_control_and_strict_eval_use_one_frozen_record_population() -> None:
+    answer_rows = build_answer_sft_rows([_record()])
+    strict_rows = build_strict_eval_rows([_record()])
+
+    assert len(answer_rows) == 2
+    assert {row["group_key"] for row in answer_rows} == {"train:human:0"}
+    assert {row["messages"][-1]["content"] for row in answer_rows} == {"5"}
+    assert len(strict_rows) == 1
+    assert strict_rows[0]["sample_id"] == "train:human:0"
+    assert parse_prediction(strict_rows[0]["messages"][-1]["content"]).answer == "5"
 
 
 def test_structured_render_preserves_operation_reference_order() -> None:

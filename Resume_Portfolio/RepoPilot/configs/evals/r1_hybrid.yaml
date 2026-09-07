@@ -1,0 +1,11 @@
+schema_version: 1
+experiment: R1-A
+variant: hybrid_rrf
+inherits: r1_bm25.yaml
+retrieval:
+  lexical: bm25
+  dense: nomic-embed-text
+  rrf_k: 60
+  query_routing: disabled
+  expansion: disabled
+  budget_selector: naive_top_k

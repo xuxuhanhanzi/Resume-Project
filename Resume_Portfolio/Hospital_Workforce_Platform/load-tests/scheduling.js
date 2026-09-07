@@ -12,8 +12,24 @@ export const options = smoke
       summaryTrendStats: ['avg', 'min', 'med', 'p(90)', 'p(95)', 'p(99)', 'max']
     }
 
-export default function () {
-  const token = __ENV.ACCESS_TOKEN
+export function setup() {
+  if (__ENV.ACCESS_TOKEN) return { token: __ENV.ACCESS_TOKEN }
+  const response = http.post(
+    `${__ENV.KEYCLOAK_URL || 'http://keycloak:8080'}/realms/hospital/protocol/openid-connect/token`,
+    {
+      client_id: 'hospital-api',
+      grant_type: 'password',
+      username: 'hr.admin',
+      password: __ENV.DEMO_PASSWORD || 'Password1!'
+    }
+  )
+  check(response, { 'Keycloak login succeeded': (r) => r.status === 200 })
+  if (response.status !== 200) throw new Error(`Keycloak login failed: ${response.status}`)
+  return { token: response.json('access_token') }
+}
+
+export default function (data) {
+  const token = data.token
   const params = { headers: { Authorization: `Bearer ${token}` } }
   const departmentId = __ENV.DEPARTMENT_ID || '1'
   const response = http.get(`${__ENV.BASE_URL || 'http://localhost:8080'}/api/shifts?departmentId=${departmentId}&from=2026-09-01T00:00:00Z&to=2026-10-01T00:00:00Z`, params)

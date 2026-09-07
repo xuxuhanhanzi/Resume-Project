@@ -20,6 +20,7 @@ datasets/ChartQA/train/
 datasets/ChartQA/val/
 datasets/ChartQA/test/
 datasets/ChartQAPro/*.parquet
+datasets/ForgeMM-Controlled-v1-Lite/
 datasets/**/.cache/
 datasets/**/*.arrow
 datasets/**/*.lock
@@ -37,4 +38,3 @@ mlruns/
 .vscode/
 .DS_Store
 Thumbs.db
-

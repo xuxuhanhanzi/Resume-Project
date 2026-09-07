@@ -16,6 +16,10 @@ SFT_TEMPLATES = (
     "Act as a chart verifier: cite only supporting cells, execute one allowed operation, "
     "then answer.",
 )
+ANSWER_SFT_TEMPLATES = (
+    "Answer the chart question concisely.",
+    "Read the chart and provide only the final answer.",
+)
 
 
 def iter_strict_records(paths: Iterable[str | Path]) -> Iterable[EvidenceRecord]:
@@ -55,6 +59,56 @@ def build_sft_rows(records: Iterable[EvidenceRecord]) -> list[dict[str, Any]]:
                     "images": [record.image_path],
                 }
             )
+    return rows
+
+
+def build_answer_sft_rows(records: Iterable[EvidenceRecord]) -> list[dict[str, Any]]:
+    """Build an answer-only SFT control with the same strict-record population.
+
+    The two views mirror the structured control's template count so that the
+    E1/E2 comparison does not accidentally change the number of sampled records.
+    """
+
+    rows = []
+    for record in records:
+        for template_index, instruction in enumerate(ANSWER_SFT_TEMPLATES):
+            rows.append(
+                {
+                    "sample_id": f"{record.record_id}:answer-template-{template_index}",
+                    "group_key": record.record_id,
+                    "template_id": template_index,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": f"{instruction}\nQuestion: {record.question}",
+                        },
+                        {"role": "assistant", "content": record.reference_answer},
+                    ],
+                    "images": [record.image_path],
+                }
+            )
+    return rows
+
+
+def build_strict_eval_rows(records: Iterable[EvidenceRecord]) -> list[dict[str, Any]]:
+    """Build one frozen structured target per strict question-level record."""
+
+    rows = []
+    for record in records:
+        rows.append(
+            {
+                "sample_id": record.record_id,
+                "source": record.source,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": f"{SFT_TEMPLATES[0]}\nQuestion: {record.question}",
+                    },
+                    {"role": "assistant", "content": render_structured_answer(record)},
+                ],
+                "images": [record.image_path],
+            }
+        )
     return rows
 
 

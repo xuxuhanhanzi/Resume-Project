@@ -1,0 +1,8 @@
+schema_version: 1
+experiment: R4-2
+variant: hybrid_episode
+inherits: r4_bm25_episode.yaml
+memory:
+  retriever: bm25_dense_rrf
+  dense_model: nomic-embed-text
+  rrf_k: 60

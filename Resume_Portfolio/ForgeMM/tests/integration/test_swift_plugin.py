@@ -1,11 +1,17 @@
 import json
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
 import pytest
 
+from forgemm.controlled.dataset import make_controlled_record
+from forgemm.controlled.protocol import render_controlled_completion
 from forgemm.swift_plugin import (
+    ForgeMMControlledEvidenceReward,
+    ForgeMMControlledOperationReward,
+    ForgeMMControlledTaskReward,
     ForgeMMEvidenceReward,
     ForgeMMOperationReward,
     ForgeMMTaskReward,
@@ -41,7 +47,40 @@ def test_swift_reward_classes_consume_extra_dataset_columns() -> None:
 
 
 def test_swift_reward_names_are_registered() -> None:
-    assert {"forgemm_task", "forgemm_evidence", "forgemm_operation"} <= set(orms)
+    assert {
+        "forgemm_task",
+        "forgemm_evidence",
+        "forgemm_operation",
+        "forgemm_controlled_task",
+        "forgemm_controlled_evidence",
+        "forgemm_controlled_operation",
+    } <= set(orms)
+
+
+def test_controlled_rewards_require_generator_backed_visual_bbox(tmp_path: Path) -> None:
+    project = tmp_path / "project"
+    dataset = project / "datasets" / "controlled"
+    dataset.mkdir(parents=True)
+    record = make_controlled_record(
+        split="train",
+        index=0,
+        root_seed=19,
+        dataset_root=dataset,
+        project_root=project,
+    )
+    gold = json.dumps(record.to_dict())
+    completion = render_controlled_completion(record)
+    box = next(
+        item.bbox for item in record.evidence if item.source_id == record.gold_evidence_ids[0]
+    )
+    wrong_box = completion.replace(
+        f"bbox=[{','.join(str(value) for value in box)}]", "bbox=[0,0,1,1]", 1
+    )
+
+    assert ForgeMMControlledTaskReward()([completion], gold) == [1.0]
+    assert ForgeMMControlledEvidenceReward()([completion], gold) == [1.0]
+    assert ForgeMMControlledOperationReward()([completion], gold) == [1.0]
+    assert ForgeMMControlledEvidenceReward()([wrong_box], gold) == [0.0]
 
 
 def test_transformers_451_compat_exposes_trl_optional_contract(

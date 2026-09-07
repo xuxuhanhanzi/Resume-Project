@@ -1,8 +1,0 @@
-{"id":"train-en-01","subset":"english","text":"the tiny tokenizer learns repeated patterns from tiny training text"}
-{"id":"train-en-02","subset":"english","text":"byte pair encoding merges the most frequent adjacent pair"}
-{"id":"train-en-03","subset":"english","text":"repeat repeat repeat token token token byte byte byte"}
-{"id":"train-zh-01","subset":"chinese","text":"分词器学习重复的字节模式，字节模式可以稳定复现。"}
-{"id":"train-zh-02","subset":"chinese","text":"模型训练需要固定词表、固定配置和固定评测。"}
-{"id":"train-mix-01","subset":"mixed","text":"ForgeLLM 学习 byte-level BPE 🚀，并验证 encode 与 decode。"}
-{"id":"train-code-01","subset":"code","text":"def encode(text: str) -> list[int]: return list(text.encode('utf-8'))"}
-{"id":"train-space-01","subset":"whitespace","text":"spaces  tabs\tand\nnewlines remain exact"}

@@ -1,0 +1,20 @@
+schema_version: 1
+experiment: R1-A
+variant: bm25_top_k
+dataset: CodeRAG-Bench/repoeval_repo
+split_protocol: grouped_20_40_40_final_holdout
+fixed_controls:
+  chunker: python_ast_or_lexical_fallback_v1
+  context_token_budget: 4096
+  top_k: 10
+  temperature: 0.0
+  repetitions: 3
+retrieval:
+  lexical: bm25
+  dense: disabled
+  query_routing: disabled
+  expansion: disabled
+  budget_selector: naive_top_k
+report:
+  metrics: [ndcg_at_10, mrr_at_10, recall_at_5, recall_at_10, latency_ms]
+  final_metrics: [pass_at_1, resolved_rate, token_cost, wall_time]

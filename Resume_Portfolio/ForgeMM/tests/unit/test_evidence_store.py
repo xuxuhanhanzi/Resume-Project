@@ -163,6 +163,51 @@ def test_derive_supported_argmax_and_count_labels() -> None:
     assert labelled_count.gold_operation.name == "count"
 
 
+def test_global_reductions_require_explicit_scope_and_unique_extrema() -> None:
+    base = _record()
+    cells = (
+        EvidenceCell("e1", "A", "Value", "1"),
+        EvidenceCell("e2", "B", "Value", "2"),
+        EvidenceCell("e3", "C", "Value", "4"),
+        EvidenceCell("e4", "D", "Value", "8"),
+    )
+    total = replace(
+        base,
+        question="What is the total sum of the smallest two bars?",
+        reference_answer="3",
+        cells=cells,
+        conflict_status="exact",
+        exclusion_reason=None,
+    )
+    spread = replace(
+        base,
+        question="What is the difference between the highest and lowest values?",
+        reference_answer="7",
+        cells=cells,
+        conflict_status="exact",
+        exclusion_reason=None,
+    )
+    unsupported = replace(
+        base,
+        question="What is the sum?",
+        reference_answer="15",
+        cells=cells,
+        conflict_status="exact",
+        exclusion_reason=None,
+    )
+
+    labelled_total = derive_supported_label(total)
+    labelled_spread = derive_supported_label(spread)
+
+    assert labelled_total.gold_operation is not None
+    assert labelled_total.gold_operation.name == "sum"
+    assert labelled_total.gold_evidence_ids == ("e1", "e2")
+    assert labelled_spread.gold_operation is not None
+    assert labelled_spread.gold_operation.name == "difference"
+    assert labelled_spread.gold_evidence_ids == ("e4", "e1")
+    assert derive_supported_label(unsupported).operation_mask is False
+
+
 def test_lookup_label_uses_exact_cell_value_not_relaxed_metric() -> None:
     base = _record()
     record = replace(

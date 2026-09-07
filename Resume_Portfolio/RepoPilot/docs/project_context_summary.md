@@ -1,33 +1,41 @@
-# Project Context Summary
+# RepoPilot 实验上下文审计（2026-08-23）
 
-> ⚠️ This is a Stage 1–6 era snapshot. For the authoritative current state (P7–P12
-> complete, gates green, metrics), see [`docs/STATUS.md`](STATUS.md).
+## 任务与基线
 
-## P0 goal
+RepoPilot 是一个本地优先、受权限和验证边界约束的 Coding Agent。现有代码已具备 BM25、可选本地
+dense/hybrid 检索、结构化工具、确定性验证器、trace/receipt、checkpoint、reviewer 与 Docker
+边界。原有 FRAMES、DABench、SWE smoke 和训练产物均保留为历史诊断，不用作本实验计划的正式结论。
 
-研究一个本地优先的 Agent 系统，如何通过规划、检索、工具、执行反馈、验证、记忆和治理机制，
-在知识研究、数据分析、软件工程三类任务形态下提高成功率，同时控制 tokens、耗时、安全风险
-和失败恢复成本。三领域分别报告各自官方主指标，不合成跨领域总分。
+本次新增的研究边界是：
 
-## Current state (as of 2026-08-09; superseded by STATUS.md)
+- R1：可独立消融的 AdaptiveCodeHybrid（RRF、查询路由、Python symbol/test 邻接、固定预算选择）；
+- R2：Plan--Execute--Verify 状态机、一次有界 replan 与可解释风险 reviewer gate；
+- R3：可选接入 runtime 的 JSON-schema、路径范围、阶段 allowlist 与结构化 recovery code；
+- R4：固定 schema 的 typed provenance memory、内容哈希 cache、LongMemEval 离线指标；
+- P0：不可覆盖 split manifest、run receipt、Wilson 区间和配对 bootstrap。
 
-Stage 1–6 教学型实现 + P7–P12 全部完成。三领域协议和评测链路已跑通：
+## 固定外部源
 
-- 知识研究 (FRAMES)：R2 hybrid 三次重复均值 **20.0%**（20/30/10），仅供参考，未达可引用规模。
-- 数据分析 (DABench)：val35 base **71.4% (25/35)** —— 唯一可引用主指标（哈希冻结、官方评分）。
-  早期 10 题 smoke 的 90% 高估约 19pp，不可引用。
-- 软件工程 (SWE-bench-Live)：Agent 官方 resolved = **0/3**，不可引用（三题已被开发污染，仅作 dev smoke）。
+| 资源 | 本地 checkout / digest | 用途 |
+|---|---|---|
+| LongMemEval | 9e0b455f4ef0e2ab8f2e582289761153549043fc；data d6f21e...a442 | R4 数据与官方评测器接口核对 |
+| CodeRAG-Bench | f9e100ca9ed94b8f1983b356ae81966e30210cf4 | R1 BEIR/RepoEval 管线核对 |
+| BFCL | 6ea57973c7a6097fd7c5915698c54c17c5b1b6c8 | R3 离线数据与 evaluator 核对 |
 
-本地 Qwen2.5-7B (Q4_K_M, digest 845dbda0ea48...) 已冻结为正式重复实验模型，
-temperature=0, seed=7, 网络 deny。Docker daemon 29.6.1 已验证可用，DABench 隔离镜像已物化。
+## 可运行性与风险
 
-**模型训练（P10 已完成）**：对 Qwen2.5-1.5B 做了 QLoRA SFT + 手写 DPO（adapter 已生成），
-但 **尚未接入评测链路**，因此不宣称任何下游准确率提升。
+- Python 3.12.3、pytest 8.4.2、Docker Server 29.6.1 与本地
+  nomic-embed-text/Qwen 模型可用；
+- 2026-08-24 的 E: 预检为 148.20 GiB 空闲，且已在 E: 的隔离 SWE-bench checkout 中通过官方
+  `--gold` 1/1 evaluator smoke 与单实例 generation smoke；Windows CRLF 兼容补丁见 ADR 0006；
+- Docker Desktop 的 image VHDX 仍位于 C:。正式 SWE-bench holdout 仍须为所有配对配置、重复、
+  workspace 与镜像缓存预留足够空间；若迁移到 Linux/云端，须固定同一代码 commit、数据 digest 与
+  Docker digest；
+- LongMemEval-S 的严格“任一共享 session 即同组”规则使 500 题连成单一泄漏组，不能构造计划要求的
+  20/40/40 split。R4 不得在此规则下开始调参或产生 final 数字。
 
-## Open risks
+## 当前结论边界
 
-- FRAMES 10 题结果不能外推；需扩到 ≥50 题做 3 次重复才可能升为"可引用"。
-- SWE-bench-Live 现有三题已被开发过程污染，后续必须冻结新的未查看 holdout。
-- FRAMES 绝对准确率低，证据合成（非检索）仍是主要瓶颈（P9 A2 已证）。
-- P10 adapter 未接入评测，下游收益未知。
-- 不得把自训练模型作为 RepoPilot MVP 的前置依赖。
+本仓库现在可以产生可复查的实验配置、数据 receipt、离线指标、工具契约和状态机回归测试；尚未产生
+R1/R2/R3/R4 任一正式 final holdout 的能力比较结果。因此任何简历中“提升”“优于”“降低”数字仍
+必须留空。

@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repopilot"
-version = "1.0.4"
+version = "1.19.0"
 description = "A compact, inspectable agent runtime and coding-agent technology lab."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = {file = "LICENSE.md"}
-dependencies = ["PyYAML>=6,<7"]
+dependencies = ["PyYAML>=6,<7", "keyring>=25,<26", "prompt_toolkit>=3.0,<4"]
 
 [project.optional-dependencies]
 dev = [
@@ -23,6 +23,9 @@ service = ["uvicorn>=0.30,<1"]
 [project.scripts]
 repopilot = "repopilot.cli:entrypoint"
 repopilot-api = "repopilot.api.server:entrypoint"
+
+[tool.setuptools.package-data]
+repopilot = ["evaluation/fixtures/*.json"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

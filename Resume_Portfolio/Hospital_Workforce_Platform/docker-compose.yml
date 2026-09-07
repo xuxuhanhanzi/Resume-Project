@@ -6,7 +6,7 @@ services:
       MYSQL_USER: ${MYSQL_USER:-hospital}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hospital}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-    ports: ["3306:3306"]
+    ports: ["${MYSQL_PORT:-3306}:3306"]
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -p\"$${MYSQL_ROOT_PASSWORD}\""]
       interval: 10s
@@ -17,7 +17,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    ports: ["6379:6379"]
+    ports: ["${REDIS_PORT:-6379}:6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -30,9 +30,9 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
-      KC_HOSTNAME: http://localhost:8081
+      KC_HOSTNAME: http://localhost:${KEYCLOAK_PORT:-8081}
       KC_HEALTH_ENABLED: "true"
-    ports: ["8081:8080"]
+    ports: ["${KEYCLOAK_PORT:-8081}:8080"]
     volumes:
       - ./infra/keycloak:/opt/keycloak/data/import:ro
 
@@ -45,7 +45,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-hospital}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-hospital}
       SPRING_DATA_REDIS_HOST: redis
-      KEYCLOAK_ISSUER_URI: http://localhost:8081/realms/hospital
+      KEYCLOAK_ISSUER_URI: http://localhost:${KEYCLOAK_PORT:-8081}/realms/hospital
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/hospital/protocol/openid-connect/certs
     depends_on:
       mysql:
@@ -54,13 +54,13 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
-    ports: ["8080:8080"]
+    ports: ["${BACKEND_PORT:-8080}:8080"]
 
   prometheus:
     image: prom/prometheus:v3.2.1
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports: ["9090:9090"]
+    ports: ["${PROMETHEUS_PORT:-9090}:9090"]
     depends_on: [backend]
 
   grafana:
@@ -71,14 +71,14 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
     volumes:
       - ./infra/grafana/provisioning/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
-    ports: ["3000:3000"]
+    ports: ["${GRAFANA_PORT:-3000}:3000"]
     depends_on: [prometheus]
 
   frontend:
     build:
       context: ./frontend
       network: host
-    ports: ["5173:80"]
+    ports: ["${FRONTEND_PORT:-5173}:80"]
     depends_on: [backend]
 
   load-test:
@@ -87,11 +87,13 @@ services:
     environment:
       ACCESS_TOKEN: ${ACCESS_TOKEN:-}
       BASE_URL: http://backend:8080
+      KEYCLOAK_URL: http://keycloak:8080
+      DEMO_PASSWORD: ${HOSPITAL_DEMO_PASSWORD:-Password1!}
       DEPARTMENT_ID: ${DEPARTMENT_ID:-1}
       K6_SMOKE: ${K6_SMOKE:-false}
     volumes:
       - ./load-tests:/scripts:ro
-      - ./docs/experiments/artifacts/h4-k6:/results
+      - ${K6_RESULTS_DIR:-./docs/experiments/artifacts/h4-k6}:/results
     command: run --summary-export=/results/summary.json /scripts/scheduling.js
     depends_on: [backend]
 

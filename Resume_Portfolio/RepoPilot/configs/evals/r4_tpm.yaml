@@ -1,0 +1,9 @@
+schema_version: 1
+experiment: R4-C1
+variant: typed_provenance_memory
+inherits: r4_time_aware_hybrid.yaml
+memory:
+  card_schema: fixed_tpm_v1
+  provenance_validator: required
+  extraction_cache: content_addressed_sha256_v1
+  budget_selector: source_plus_card_diversified_v1

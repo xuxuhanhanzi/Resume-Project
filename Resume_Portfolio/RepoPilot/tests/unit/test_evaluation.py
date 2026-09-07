@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from repopilot.core.contracts import RunStatus
+from repopilot.evaluation.io import load_evaluation_records
 from repopilot.evaluation.metrics import EvaluationRecord, retrieval_metrics, summarize
 from repopilot.evaluation.report import build_ablation_report
 
@@ -27,6 +30,24 @@ def test_retrieval_metrics() -> None:
 
     assert metrics["file_recall@2"] == 1.0
     assert metrics["mrr"] == 0.75
+
+
+def test_evaluation_jsonl_loader_is_strict_and_offline(tmp_path: Path) -> None:
+    path = tmp_path / "records.jsonl"
+    path.write_text(
+        '{"task_id":"one","status":"completed","hidden_tests_passed":true,'
+        '"iterations":2,"tool_calls":3,"input_tokens":10,"output_tokens":4,'
+        '"wall_seconds":1.5,"changed_files":1,"security_blocks":0}\n',
+        encoding="utf-8",
+    )
+
+    records = load_evaluation_records(path)
+
+    assert records[0].task_id == "one"
+    assert records[0].status is RunStatus.COMPLETED
+    path.write_text('{"task_id":"one","status":"completed"}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="unsupported or missing"):
+        load_evaluation_records(path)
 
 
 def test_ablation_requires_identical_task_sets() -> None:

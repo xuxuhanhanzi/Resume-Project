@@ -1,0 +1,8 @@
+schema_version: 1
+experiment: R4-1
+variant: bm25_episode
+inherits: r4_window.yaml
+memory:
+  retriever: bm25_session
+  top_k: 5
+  ingestion_cache: disabled

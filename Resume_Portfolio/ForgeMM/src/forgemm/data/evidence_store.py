@@ -30,7 +30,7 @@ _ARITHMETIC_CUES = {
     "ratio": ("ratio", "how many times"),
     "product": ("product",),
 }
-LABELER_VERSION = "rules-1.3.0"
+LABELER_VERSION = "rules-1.4.0"
 
 
 class EvidenceStore:
@@ -129,6 +129,10 @@ def derive_supported_label(record: EvidenceRecord) -> EvidenceRecord:
         operation = _derive_count_operation(record.cells, question, record.reference_answer)
     if operation is None:
         operation = _derive_arithmetic_operation(candidates, question, record.reference_answer)
+    if operation is None:
+        operation = _derive_global_reduction_operation(
+            record.cells, question, record.reference_answer
+        )
     if operation is None and not _is_boolean_answer(record.reference_answer):
         matching = [
             cell for cell in candidates if _lookup_values_match(cell.value, record.reference_answer)
@@ -252,10 +256,14 @@ def _derive_order_operation(
 def _derive_count_operation(
     cells: tuple[EvidenceCell, ...], question: str, answer: str
 ) -> Operation | None:
-    if not any(
-        cue in question
-        for cue in ("how many data points", "how many values", "how many groups", "how many bars")
-    ):
+    count_cues = (
+        "how many data points",
+        "how many values",
+        "how many groups",
+        "how many bars",
+        "how many items",
+    )
+    if not any(cue in question for cue in count_cues):
         return None
     mentioned_columns = {
         normalize_text(cell.column)
@@ -272,6 +280,134 @@ def _derive_count_operation(
         tuple(OperationArgument("ref", cell.evidence_id, True) for cell in selected),
     )
     result = execute(operation, selected)
+    return operation if result.success and _operation_values_match(result.value, answer) else None
+
+
+def _derive_global_reduction_operation(
+    cells: tuple[EvidenceCell, ...], question: str, answer: str
+) -> Operation | None:
+    """Derive only explicit whole-chart or extremum reductions.
+
+    The question must name the reduction and its scope (all, smallest/largest
+    N, or highest-minus-lowest).  This prevents an answer-matching subset search
+    from inventing evidence for an otherwise unsupported question.
+    """
+
+    selected = _scoped_numeric_cells(cells, question)
+    if not selected:
+        return None
+    if _has_extreme_difference_scope(question):
+        extremes = _extreme_cells(selected, 1, highest=True) + _extreme_cells(
+            selected, 1, highest=False
+        )
+        if len(extremes) == 2:
+            return _verified_operation("difference", extremes, answer)
+        return None
+
+    operation_name = _reduction_name(question)
+    if operation_name is None:
+        return None
+    extreme = _extreme_scope(question)
+    if extreme is not None:
+        count, highest = extreme
+        selected = _extreme_cells(selected, count, highest=highest)
+        if len(selected) != count:
+            return None
+    elif not _has_global_scope(question):
+        return None
+    return _verified_operation(operation_name, selected, answer)
+
+
+def _scoped_numeric_cells(
+    cells: tuple[EvidenceCell, ...], question: str
+) -> tuple[EvidenceCell, ...]:
+    mentioned_columns = {
+        normalize_text(cell.column)
+        for cell in cells
+        if _contains_term(question, normalize_text(cell.column))
+    }
+    candidates = tuple(
+        cell
+        for cell in cells
+        if not mentioned_columns or normalize_text(cell.column) in mentioned_columns
+    )
+    try:
+        for cell in candidates:
+            normalize_number(cell.value)
+    except ValueError:
+        return ()
+    return candidates
+
+
+def _has_extreme_difference_scope(question: str) -> bool:
+    difference = any(cue in question for cue in _ARITHMETIC_CUES["difference"])
+    high = any(cue in question for cue in ("highest", "largest", "maximum", "max"))
+    low = any(cue in question for cue in ("lowest", "smallest", "minimum", "min"))
+    return difference and high and low
+
+
+def _reduction_name(question: str) -> str | None:
+    if any(cue in question for cue in _ARITHMETIC_CUES["sum"]):
+        return "sum"
+    if any(cue in question for cue in _ARITHMETIC_CUES["average"]):
+        return "average"
+    if any(cue in question for cue in _ARITHMETIC_CUES["product"]):
+        return "product"
+    return None
+
+
+def _has_global_scope(question: str) -> bool:
+    return any(
+        cue in question
+        for cue in ("all", "total", "combined", "last ", "first ", "whole chart", "entire")
+    )
+
+
+def _extreme_scope(question: str) -> tuple[int, bool] | None:
+    count = _scope_count(question)
+    if count is None:
+        return None
+    if any(cue in question for cue in ("smallest", "lowest", "bottom")):
+        return count, False
+    if any(cue in question for cue in ("largest", "highest", "top")):
+        return count, True
+    if "last" in question:
+        return count, True
+    if "first" in question:
+        return count, False
+    return None
+
+
+def _scope_count(question: str) -> int | None:
+    word_counts = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
+    for word, count in word_counts.items():
+        if word in question:
+            return count
+    match = re.search(r"\b([2-5])(?:st|nd|rd|th)?\b", question)
+    return int(match.group(1)) if match is not None else None
+
+
+def _extreme_cells(
+    cells: tuple[EvidenceCell, ...], count: int, *, highest: bool
+) -> tuple[EvidenceCell, ...]:
+    ordered = sorted(cells, key=lambda cell: normalize_number(cell.value), reverse=highest)
+    if len(ordered) < count:
+        return ()
+    if len(ordered) > count and normalize_number(ordered[count - 1].value) == normalize_number(
+        ordered[count].value
+    ):
+        return ()
+    return tuple(ordered[:count])
+
+
+def _verified_operation(
+    name: str, cells: tuple[EvidenceCell, ...], answer: str
+) -> Operation | None:
+    operation = Operation(
+        name,
+        tuple(OperationArgument("ref", cell.evidence_id, True) for cell in cells),
+    )
+    result = execute(operation, cells)
     return operation if result.success and _operation_values_match(result.value, answer) else None
 
 

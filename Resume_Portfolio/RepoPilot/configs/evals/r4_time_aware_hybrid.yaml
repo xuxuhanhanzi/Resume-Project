@@ -1,0 +1,6 @@
+schema_version: 1
+experiment: R4-3
+variant: time_aware_hybrid
+inherits: r4_hybrid_episode.yaml
+memory:
+  time_filter: deterministic_query_date_range_v1

@@ -1,8 +1,0 @@
-[data]
-unicode_normalization = "NFC"
-min_chars = 20
-max_chars = 12000
-split_seed = 20260727
-train_bps = 9000
-validation_bps = 500
-test_bps = 500

@@ -1,0 +1,7 @@
+schema_version: 1
+experiment: R3-A
+variant: typed_stage_scoped_tool_surface
+inherits: r3_b1.yaml
+contract:
+  stage_allowlist: deterministic_explore_modify_verify_v1
+  transitions: observed_tool_result_only

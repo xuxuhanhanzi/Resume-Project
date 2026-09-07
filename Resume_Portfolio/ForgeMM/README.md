@@ -1,5 +1,9 @@
 # ForgeMM
 
+实验 PC 的自动安装与顺序运行入口为 `scripts/setup_experiment_pc.sh` 和
+`scripts/run_experiment_pc.sh`；正式档会下载并核验 ChartQA、ChartQAPro 与
+Qwen2.5-VL-3B，然后通过可续跑的 Stage 04 驱动完成 SFT、GRPO、消融、冻结选型和测试。
+
 ForgeMM 是一个面向图表问答可信推理的多模态大模型后训练项目。项目以
 Qwen2.5-VL-3B-Instruct 为底座、以 ms-swift 为训练依赖，通过结构化 QLoRA
 SFT、标准 GRPO 和 FGRPO-inspired Chart-FGRPO，研究答案正确性、证据一致性与

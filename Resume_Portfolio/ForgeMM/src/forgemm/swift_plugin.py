@@ -11,6 +11,7 @@ import json
 import os
 from typing import Any
 
+from forgemm.controlled.protocol import ControlledRecord, verify_controlled_completion
 from forgemm.data.schemas import EvidenceCell
 from forgemm.rewards.scoring import RewardBundle, score_completion
 
@@ -96,6 +97,39 @@ class ForgeMMOperationReward(_ForgeMMReward):
     channel = "operation"
 
 
+class _ForgeMMControlledReward(ORM):  # type: ignore[misc]
+    """Reward channel for generator-backed visual evidence with pixel boxes."""
+
+    channel: str
+
+    def __call__(
+        self,
+        completions: list[str],
+        controlled_gold: list[Any] | Any,
+        **kwargs: Any,
+    ) -> list[float]:
+        del kwargs
+        records = _broadcast(controlled_gold, len(completions))
+        return [
+            _controlled_channel(
+                verify_controlled_completion(_decode_controlled(item), completion), self.channel
+            )
+            for completion, item in zip(completions, records, strict=True)
+        ]
+
+
+class ForgeMMControlledTaskReward(_ForgeMMControlledReward):
+    channel = "task"
+
+
+class ForgeMMControlledEvidenceReward(_ForgeMMControlledReward):
+    channel = "evidence"
+
+
+class ForgeMMControlledOperationReward(_ForgeMMControlledReward):
+    channel = "operation"
+
+
 def score_swift_batch(completions: list[str], **columns: Any) -> list[RewardBundle]:
     count = len(completions)
     answers = _broadcast(columns["reference_answer"], count)
@@ -111,6 +145,23 @@ def score_swift_batch(completions: list[str], **columns: Any) -> list[RewardBund
             operation_mask=_as_bool(operation_masks[index]),
         )
         for index, completion in enumerate(completions)
+    ]
+
+
+def score_controlled_swift_batch(
+    completions: list[str], **columns: Any
+) -> list[tuple[float, float, float]]:
+    """CPU-testable scoring mirror for the controlled ms-swift reward channels."""
+
+    records = _broadcast(columns["controlled_gold"], len(completions))
+    return [
+        (
+            float(verdict.answer_ok),
+            float(verdict.evidence_ok),
+            float(verdict.operation_ok),
+        )
+        for completion, item in zip(completions, records, strict=True)
+        for verdict in (verify_controlled_completion(_decode_controlled(item), completion),)
     ]
 
 
@@ -130,6 +181,26 @@ def _decode_evidence(value: Any) -> tuple[EvidenceCell, ...]:
     return tuple(EvidenceCell(**item) if isinstance(item, dict) else item for item in value)
 
 
+def _decode_controlled(value: Any) -> ControlledRecord:
+    if isinstance(value, ControlledRecord):
+        return value
+    if isinstance(value, str):
+        value = json.loads(value)
+    if not isinstance(value, dict):
+        raise ValueError("controlled_gold must be a ControlledRecord or JSON object")
+    return ControlledRecord.from_dict(value)
+
+
+def _controlled_channel(verdict: Any, channel: str) -> float:
+    if channel == "task":
+        return float(verdict.answer_ok)
+    if channel == "evidence":
+        return float(verdict.evidence_ok)
+    if channel == "operation":
+        return float(verdict.operation_ok)
+    raise ValueError(f"unknown_controlled_reward_channel:{channel}")
+
+
 def _as_bool(value: Any) -> bool:
     if isinstance(value, str):
         return value.strip().lower() in {"1", "true", "yes"}
@@ -139,11 +210,18 @@ def _as_bool(value: Any) -> bool:
 orms["forgemm_task"] = ForgeMMTaskReward
 orms["forgemm_evidence"] = ForgeMMEvidenceReward
 orms["forgemm_operation"] = ForgeMMOperationReward
+orms["forgemm_controlled_task"] = ForgeMMControlledTaskReward
+orms["forgemm_controlled_evidence"] = ForgeMMControlledEvidenceReward
+orms["forgemm_controlled_operation"] = ForgeMMControlledOperationReward
 
 __all__ = [
     "ForgeMMEvidenceReward",
+    "ForgeMMControlledEvidenceReward",
+    "ForgeMMControlledOperationReward",
+    "ForgeMMControlledTaskReward",
     "ForgeMMOperationReward",
     "ForgeMMTaskReward",
     "orms",
+    "score_controlled_swift_batch",
     "score_swift_batch",
 ]

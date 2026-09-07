@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path, PurePath
 
-from repopilot.task import PublicTaskSpec
+from repopilot.workspace.contracts import WorkspaceTask
 
 
 class PathSecurityError(ValueError):
@@ -27,7 +27,7 @@ def _under(path: str, boundary: str) -> bool:
 
 
 def resolve_workspace_path(
-    task: PublicTaskSpec, relative_path: str, *, require_exists: bool = True
+    task: WorkspaceTask, relative_path: str, *, require_exists: bool = True
 ) -> Path:
     """Resolve one model-provided path and enforce workspace/task boundaries."""
     if "\x00" in relative_path or Path(relative_path).is_absolute():
@@ -60,7 +60,7 @@ def resolve_workspace_path(
     return candidate
 
 
-def task_path_is_visible(task: PublicTaskSpec, candidate: Path) -> bool:
+def task_path_is_visible(task: WorkspaceTask, candidate: Path) -> bool:
     """Return whether an existing candidate is inside the model-visible task boundary."""
     try:
         relative = candidate.resolve(strict=True).relative_to(task.workspace).as_posix()

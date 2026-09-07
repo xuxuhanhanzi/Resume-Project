@@ -1,0 +1,8 @@
+schema_version: 1
+experiment: R2-B
+variant: pev_always_reviewer
+inherits: r2_direct_react.yaml
+control:
+  mode: plan_execute_verify_v1
+  reviewer: always
+  max_replans: 1

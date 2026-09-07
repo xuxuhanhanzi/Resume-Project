@@ -6,11 +6,12 @@ from pathlib import Path
 import pytest
 
 from repopilot.core.contracts import PolicyOutcome, ToolCall
-from repopilot.runtime.policy import PolicyEngine
+from repopilot.runtime.policy import PermissionEngine, PermissionMode, PolicyEngine
 from repopilot.runtime.runner import DockerSandboxConfig, DockerSandboxRunner, LocalTrustedRunner
 from repopilot.security.paths import PathSecurityError, resolve_workspace_path
 from repopilot.task import PublicTaskSpec
 from repopilot.tools.coding import ApplyPatchTool
+from repopilot.workspace.contracts import InteractiveTask
 
 
 def _task(tmp_path: Path) -> PublicTaskSpec:
@@ -65,6 +66,7 @@ def test_docker_command_contains_minimum_isolation(tmp_path: Path) -> None:
     assert "--security-opt no-new-privileges" in joined
     assert "--pids-limit" in command
     assert "--user" in command
+    assert any(entry.endswith("target=/workspace,readonly") for entry in command)
 
 
 @pytest.mark.safety
@@ -75,5 +77,20 @@ def test_high_risk_file_requires_approval(tmp_path: Path) -> None:
     )
 
     decision = PolicyEngine().decide(call, ApplyPatchTool().spec, task)
+
+    assert decision.outcome is PolicyOutcome.REQUIRE_APPROVAL
+
+
+@pytest.mark.safety
+@pytest.mark.parametrize("path", ["REPOPILOT.md", "AGENTS.md", ".repopilot/mcp.json"])
+def test_project_agent_control_plane_requires_approval_even_in_accept_edits(
+    tmp_path: Path, path: str
+) -> None:
+    task = InteractiveTask("interactive", tmp_path, "Update project files")
+    decision = PermissionEngine(PermissionMode.ACCEPT_EDITS).decide(
+        ToolCall("control", "apply_patch", {"path": path, "old_text": "", "new_text": "x"}),
+        ApplyPatchTool().spec,
+        task,
+    )
 
     assert decision.outcome is PolicyOutcome.REQUIRE_APPROVAL

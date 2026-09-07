@@ -31,3 +31,9 @@ def test_evaluate_task_rows_reports_type_breakdown() -> None:
     assert result["task_accuracy"] == pytest.approx(0.5)
     assert result["format_compliance"] == pytest.approx(0.5)
     assert result["by_question_type"]["Factoid"]["samples"] == 2
+
+
+def test_task_evaluation_extracts_a_structured_reference_answer() -> None:
+    result = evaluate_task_rows([{"response": "38", "labels": VALID}])
+
+    assert result["task_accuracy"] == pytest.approx(1.0)

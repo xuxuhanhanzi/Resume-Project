@@ -1,0 +1,59 @@
+schema_version: 1
+experiment: R2-development-matrix
+dataset: SWE-bench_Verified
+dataset_revision: 78f471bf655a3137b2e8a75af1501690ec009ec3
+manifest: evaluation/benchmarks/manifests/swebench_verified_r2_20260824_v2.json
+manifest_sha256: 0aedbbc3863615a34ed7f7cb7dcef3b117a54a11ca181c704d5a40a05a1cd57b
+split: development
+instances: 107
+fixed_controls:
+  model: qwen2.5:7b
+  model_revision: 845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e
+  temperature: 0.0
+  repetition_seeds: [7, 19, 43]
+  max_iterations: 12
+  max_tool_calls: 20
+  max_wall_seconds: 600
+  max_changed_files: 8
+  total_token_budget: 96000
+  token_budget_mode: pre_call_conservative_reservation_v1
+  token_reservation_framing_overhead: 512
+  tool_surface: [list_files, read_file, search_text, find_symbol, apply_patch, run_tests, git_diff, inspect_failure]
+  official_evaluator_commit: 7a21e05772954cc81471ae19d56f436cecf43c54
+  evaluator_lf_file_sha256: 71450343B39D2B733A4254F63B7A027BE5E301CBA9E8E1772436626D34762C4F
+matrix:
+  - id: direct_react
+    cli_variant: direct_react
+    config: configs/evals/r2_direct_react.yaml
+    max_replans: 0
+  - id: pev_no_reviewer
+    cli_variant: pev_no_reviewer
+    config: configs/evals/r2_pev_no_reviewer.yaml
+    max_replans: 1
+  - id: pev_always_reviewer
+    cli_variant: pev_always_reviewer
+    config: configs/evals/r2_pev_always_reviewer.yaml
+    max_replans: 1
+  - id: pev_risk_replan_0
+    cli_variant: pev_risk_gated
+    config: configs/evals/r2_pev_risk_gated_replan0.yaml
+    max_replans: 0
+  - id: pev_risk_replan_1
+    cli_variant: pev_risk_gated
+    config: configs/evals/r2_pev_risk_gated.yaml
+    max_replans: 1
+  - id: pev_risk_replan_2
+    cli_variant: pev_risk_gated
+    config: configs/evals/r2_pev_risk_gated_replan2.yaml
+    max_replans: 2
+selection_boundary:
+  development: compare all matrix rows and freeze the validation candidates before validation
+  validation: select the final comparison without reading final_holdout results
+  final_holdout: run selected configurations exactly once with --allow-final-holdout
+workspace_lifecycle:
+  required: one clean public-base workspace per instance and repetition
+  reuse_root: ${REPOPILOT_SWEBENCH_WORKSPACE_ROOT}
+  status: dedicated_copy_per_run_no_reuse
+  post_run_operation: retain immutable run workspace as evidence
+  preconditions: [generation_patch_trace_saved, generation_receipt_saved, workspace_receipt_verified]
+  prohibited_operations: [git_reset_hard, git_clean, bulk_filesystem_deletion]
