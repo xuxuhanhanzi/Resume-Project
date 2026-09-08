@@ -14,8 +14,9 @@ bash scripts/bootstrap_experiment_pc.sh smoke
 bash scripts/run_all_experiments.sh smoke
 ```
 
-正式实验的数据许可确认、两条启动命令、阶段顺序、断点续跑和产物位置见
-[`docs/EXPERIMENT_PC_RUNBOOK.md`](docs/EXPERIMENT_PC_RUNBOOK.md)。
+简要运行方式见 [`docs/EXPERIMENT_PC_RUNBOOK.md`](docs/EXPERIMENT_PC_RUNBOOK.md)。交给实验执行人员的
+Windows 新机配置、数据下载、smoke/full 实验、断点续跑、验收与结果交接规范见
+[`docs/LAB_PC_EXPERIMENT_OPERATIONS_MANUAL.md`](docs/LAB_PC_EXPERIMENT_OPERATIONS_MANUAL.md)。
 
 | 类别 | 项目 | 简历定位 | 当前证据口径 |
 | --- | --- | --- | --- |
